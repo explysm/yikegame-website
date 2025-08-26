@@ -21,12 +21,16 @@ h1 {
     100% { background-position: 0% 50%; }
 }
 
-.buttons-left {
+.btn-bg {
     
     text-align: left;
     position: fixed;
 
     left: 15px;
+}
+.warning {
+    position: fixed;
+    top: 100;
 }
 
 .btn {
@@ -51,10 +55,28 @@ button:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 10px rgba(0,0,0,0.2);
 }
+.Back {
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    color:white;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    
+    font-size: 37px;
+    font-family: cursive;
+    cursor: pointer;
+    transition: all 0.3s ease; 
 
+    
+    position: fixed;
+
+    left: 20px;
+    top: 700px;
+    
+}
 p {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    font-size: 20px;
+
 }
