@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, inital-scale=1.0">
+        <Title>Global Chat</Title>
+        <link rel="stylesheet" href="style.css">  
+    </head>
+    <body>
+     <div id="app">
+            <h1>Global Chat</h1>
+
+        <div id="auth">
+            <button id="loginBtn" class="btn">Login with Google</button>
+            <button id="logoutBtn" class="btn" style="display:none;">Logout</button>
+        </div>
+
+        <!chat area!>
+
+        <div id="chatBox" class="hidden">
+            <div id="messages"></div>
+            <form id="chatForm">
+                <input type="text" id="messageInput" placeholder="Type a message..." required>
+                <button type="submit" class="btn">send</button>
+            </form>
+        </div>
+     </div>
+
+     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
+     <script>
+        const firebaseConfig = {
+            apiKey: "AlzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
+            authDomain: "yikegames-website.firebaseapp.com",
+            projectId: "yikegames-website",
+            storageBucket: "yikegames-website.firebasestorage.app",
+            messageSenderId: "1086586566551",
+            appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
+            measurementId: "G-FXH0D07D86"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+     </script>
+
+     <script src="chat.js"></script>
+   </body>
+</html>

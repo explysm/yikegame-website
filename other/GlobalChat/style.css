@@ -1,0 +1,84 @@
+body {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    background: linear-gradient(135deg, #6a0dad, #8a2be2, #9370db);
+    color: white;
+    margin: o;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#app {
+    width: 100%;
+    max-width: 500px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+h1 {
+    text-align: center;
+}
+
+.btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    color:white;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    
+    font-size: 20px;
+    font-family: cursive;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+button:hover {
+    font-size: 20px;
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+#chatBox {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+}
+
+#messages {
+    flex: 1;
+    overflow-y:auto;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.message {
+    background: rgba(255, 255, 255, 0.15);
+    margin: 5px 0;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+#chatForm {
+    display: flex;
+    margin-top: 10px;
+}
+
+#messageInput {
+    flex: 1;
+    padding: 8px;
+    border-radius: 10px;
+    border: none;
+    margin-right: 8px;
+}
+
+.hidden {
+    display: none;
+}
