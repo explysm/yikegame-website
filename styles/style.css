@@ -39,7 +39,7 @@ h1 {
     transition: all 0.3s ease;
 }
 button:hover {
-    font-size: 45px;
+    font-size: 37px;
     padding: 12px 24px;
     background: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
