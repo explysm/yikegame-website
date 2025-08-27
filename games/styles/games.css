@@ -1,4 +1,5 @@
 body {
+    width: 100%;
     height: 100vh;
     margin: 0;
     background: linear-gradient(270deg, #B19CD9, #c8a2c8, #d69bd6, #f76af7);
