@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern Pong</title>
+<style>
+  body {
+    margin: 0;
+    font-family: "SF-Pro-Light", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(270deg, #b1aeb1, #747174, #575557);
+    background-size: 800% 800%;
+    animation: gradientShift 15s ease infinite;
+    overflow: hidden;
+    color: white;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  canvas {
+    background: rgba(0,0,0,0.4);
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  }
+
+  .back-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    color: white;
+    padding: 10px 20px;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+  }
+  .back-button:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+  }
+</style>
+</head>
+<body>
+<canvas id="pong" width="800" height="500"></canvas>
+<a href="../../games.html"><button class="back-button">Back</button></a>
+
+<script>
+const canvas = document.getElementById("pong");
+const ctx = canvas.getContext("2d");
+
+const paddleWidth = 20;
+const paddleHeight = 100;
+const ballSize = 20;
+const speed = 6;
+
+let leftPaddle = { x: 0, y: canvas.height/2 - paddleHeight/2, dy: 0 };
+let rightPaddle = { x: canvas.width - paddleWidth, y: canvas.height/2 - paddleHeight/2, dy: 0 };
+let ball = { x: canvas.width/2 - ballSize/2, y: canvas.height/2 - ballSize/2, dx: speed, dy: speed, scale:1, alpha:1, animating:false };
+
+let leftScore = 0;
+let rightScore = 0;
+let canScore = true;
+let trail = [];
+
+function drawRect(x, y, w, h, color = "white") {
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, w, h);
+}
+
+function drawCircle(b) {
+  ctx.save();
+  ctx.globalAlpha = b.alpha;
+  ctx.translate(b.x + ballSize/2, b.y + ballSize/2);
+  ctx.scale(b.scale, b.scale);
+  ctx.beginPath();
+  ctx.arc(0,0, ballSize/2, 0, Math.PI*2);
+  ctx.fillStyle = "white";
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawNet() {
+  for(let i = 0; i < canvas.height; i += 30) {
+    drawRect(canvas.width/2 - 1, i, 2, 20);
+  }
+}
+
+function drawScore() {
+  ctx.font = "40px SF-Pro-Light, sans-serif";
+  ctx.fillText(leftScore, canvas.width/4, 50);
+  ctx.fillText(rightScore, canvas.width*3/4, 50);
+}
+
+function resetBall(callback) {
+  ball.animating = true;
+  ball.scale = 1;
+  ball.alpha = 1;
+  const duration = 300;
+  const startTime = performance.now();
+
+  function animate(time) {
+    const t = (time - startTime) / duration;
+    if(t < 1){
+      ball.scale = 1 - t;
+      ball.alpha = 1 - t;
+      requestAnimationFrame(animate);
+    } else {
+      ball.x = canvas.width/2 - ballSize/2;
+      ball.y = canvas.height/2 - ballSize/2;
+      ball.dx = -ball.dx;
+      ball.dy = speed * (Math.random() > 0.5 ? 1 : -1);
+
+      const fadeInStart = performance.now();
+      function fadeIn(time2){
+        const t2 = (time2 - fadeInStart) / duration;
+        if(t2 < 1){
+          ball.scale = t2;
+          ball.alpha = t2;
+          requestAnimationFrame(fadeIn);
+        } else {
+          ball.scale = 1;
+          ball.alpha = 1;
+          ball.animating = false;
+          if(callback) callback();
+        }
+      }
+      requestAnimationFrame(fadeIn);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function update() {
+  // Move paddles
+  leftPaddle.y += leftPaddle.dy;
+  rightPaddle.y += rightPaddle.dy;
+
+  // Keep paddles on screen
+  leftPaddle.y = Math.max(Math.min(leftPaddle.y, canvas.height - paddleHeight), 0);
+  rightPaddle.y = Math.max(Math.min(rightPaddle.y, canvas.height - paddleHeight), 0);
+
+  // Move ball
+  if(!ball.animating){
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+  }
+
+  // Collisions with top/bottom
+  if(ball.y <= 0 || ball.y + ballSize >= canvas.height) ball.dy = -ball.dy;
+
+  // Collisions with paddles
+  if(ball.x <= leftPaddle.x + paddleWidth && ball.y + ballSize >= leftPaddle.y && ball.y <= leftPaddle.y + paddleHeight) ball.dx = -ball.dx;
+  if(ball.x + ballSize >= rightPaddle.x && ball.y + ballSize >= rightPaddle.y && ball.y <= rightPaddle.y + paddleHeight) ball.dx = -ball.dx;
+
+  // Score
+  if(canScore){
+    if(ball.x < 0){
+      rightScore++;
+      canScore = false;
+      resetBall(()=>{ canScore = true; });
+    }
+    if(ball.x + ballSize > canvas.width){
+      leftScore++;
+      canScore = false;
+      resetBall(()=>{ canScore = true; });
+    }
+  }
+
+  // Trail effect
+  trail.push({x: ball.x, y: ball.y, alpha: 0.2});
+  if(trail.length > 20) trail.shift();
+}
+
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawRect(leftPaddle.x, leftPaddle.y, paddleWidth, paddleHeight);
+  drawRect(rightPaddle.x, rightPaddle.y, paddleWidth, paddleHeight);
+
+  // draw trail
+  trail.forEach(t => {
+    ctx.globalAlpha = t.alpha;
+    ctx.fillStyle = "white";
+    ctx.fillRect(t.x + ballSize/4, t.y + ballSize/4, ballSize/2, ballSize/2);
+  });
+  ctx.globalAlpha = 1;
+
+  drawCircle(ball);
+  drawNet();
+  drawScore();
+}
+
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+
+// Controls
+document.addEventListener("keydown", e => {
+  if(e.key === "w") leftPaddle.dy = -speed;
+  if(e.key === "s") leftPaddle.dy = speed;
+  if(e.key === "ArrowUp") rightPaddle.dy = -speed;
+  if(e.key === "ArrowDown") rightPaddle.dy = speed;
+});
+
+document.addEventListener("keyup", e => {
+  if(e.key === "w" || e.key === "s") leftPaddle.dy = 0;
+  if(e.key === "ArrowUp" || e.key === "ArrowDown") rightPaddle.dy = 0;
+});
+</script>
+</body>
+</html>

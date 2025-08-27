@@ -1,20 +1,55 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Just a block</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
- <head>
-   <link rel="stylesheet" href="style.css">
-    <Title>Just a block</Title>
- </head>
- <body>
-    <div class="GameWindow">
-      <iframe frameborder="0" src="https://itch.io/embed-upload/14391749?color=333333" allowfullscreen="" width="1232" height="552">
-         <a href="https://yikegames.itch.io/jab">Play Just a block... (And Dobby) on itch.io</a>
-      </iframe>
-    </div>
-    <div class="about">
-      <h1>Just a block.</h1>
-      <p>JAB. A game about a block in the middle of no where</p>
-    </div>
-      <a href="http://explysm.github.io/yikegame-website"><button class=btn>
-         Back
-      </button></a>
- </body>
+    <!-- Game Window -->
+    <section class="game-window">
+        <iframe src="https://itch.io/embed-upload/14391749?color=333333" frameborder="0" allowfullscreen>
+            <a href="https://yikegames.itch.io/jab">Play Just a block on itch.io</a>
+        </iframe>
+    </section>
+
+    <!-- Game Description -->
+    <section class="about">
+        <h1>Just a block</h1>
+        <p>JAB. A game about a block in the middle of nowhere.</p>
+    </section>
+
+    <!-- Back Button -->
+    <a href="../../../games/games.html">
+        <button class="btn">Back</button>
+    </a>
+
+    <script>
+  // Apply fade-in on page load
+  document.body.classList.add('fade-enter');
+  setTimeout(() => {
+    document.body.classList.add('fade-enter-active');
+  }, 10);
+
+  // Intercept clicks on links to apply fade-out
+  document.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+
+      // Only do this for internal links
+      if (href && !href.startsWith('http')) {
+        e.preventDefault();
+        document.body.classList.remove('fade-enter-active');
+        document.body.classList.add('fade-exit-active');
+
+        setTimeout(() => {
+          window.location.href = href;
+        }, 500); // match transition duration
+      }
+    });
+  });
+</script>
+</body>
+</html>

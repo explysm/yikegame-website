@@ -1,33 +1,99 @@
-
-<!doctype html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Main Screen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles/style.css">
+
+    <!-- SEO Meta -->
+    <meta name="description" content="YikeGames offical website featuring games and developer updates.">
+    <meta name="keywords" content="Explysm, Yikegames, Games, Game Development, Indie Games, Portfolio">
+    <meta name="author" content="Explysm">
+
+    <!-- Open Graph / Social Sharing -->
+    <meta property="og:title" content="YikeGames>
+    <meta property="og:description" content="Play indie games and check out development updates from Explysm.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://explysm.github.io/yikegame-website">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="YikeGames">
+    <meta name="twitter:description" content="Play indie games and check out development updates from Explysm.">
+
 </head>
-<Body>
-    <h1>Welcome to the home page! Go to any section using the buttons below</h1>
-    <br>
-    
-    <div class="buttons-center">
-      <a href="games/games.html" class="btn1">
-        <button class="btn">Games</button>
-      </a>
+<body>
+    <header>
+        <h1>Welcome to the home page!</h1>
+        <p class="subtitle">Go to any section using the buttons below</p>
+    </header>
 
-      <a href="other/aboutme.html">
-        <button class="btn">About Me</button>
-      </a>
-    </div>
+    <section class="buttons-center">
+        <a href="games/games.html"><button class="btn">Games</button></a>
+        <a href="other/aboutme.html"><button class="btn">About Me</button></a>
+    </section>
 
-    <div class="warning">
-        <p class="warning1">⚠️This site is designed for desktop. mobile experience may be limited.⚠️</p>
-    </div>
+    <section class="warning">
+        <p class="warning1">⚠️ This site is designed for desktop. Mobile experience may be limited. ⚠️</p>
+    </section>
 
-    <div class="web">
-        <a href="http://www.yikegames.qzz.io"><p class="web1">yikegames.qzz.io</p></a>
-        <a href="https://github.com/explysm"><p class="web1">github.com/explysm</p></a>
-    </div>
+    <section class="web">
+        <a href="http://www.yikegames.qzz.io">yikegames.qzz.io</a><br>
+        <a href="https://github.com/explysm">github.com/explysm</a><br>
+        <a href="https://yikegames.itch.io">yikegames.itch.io</a>
+    </section>
 
-    
+    <!-- 🔹 Latest Updates Section -->
+    <section id="commits" class="updates">
+      <h2>Latest Updates</h2>
+      <ul id="commit-list"></ul>
+    </section>
 
-</Body>
+    <script>
+    async function loadCommits() {
+      const repo = "explysm/yikegame-website";
+      const response = await fetch(`https://api.github.com/repos/${repo}/commits`);
+      const commits = await response.json();
 
+      const list = document.getElementById("commit-list");
+      list.innerHTML = "";
+
+      commits.slice(0, 5).forEach(c => {
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${c.commit.author.name}</strong>: ${c.commit.message} 
+                        <br><small>${new Date(c.commit.author.date).toLocaleString()}</small>`;
+        list.appendChild(li);
+      });
+    }
+
+    loadCommits();
+    </script>
+
+    <script>
+  // Apply fade-in on page load
+  document.body.classList.add('fade-enter');
+  setTimeout(() => {
+    document.body.classList.add('fade-enter-active');
+  }, 10);
+
+  // Intercept clicks on links to apply fade-out
+  document.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+
+      // Only do this for internal links
+      if (href && !href.startsWith('http')) {
+        e.preventDefault();
+        document.body.classList.remove('fade-enter-active');
+        document.body.classList.add('fade-exit-active');
+
+        setTimeout(() => {
+          window.location.href = href;
+        }, 500); // match transition duration
+      }
+    });
+  });
+</script>
+</body>
+</html>

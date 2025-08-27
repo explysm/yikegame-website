@@ -1,30 +1,68 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="styles/games.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Games</title>
-
+    <link rel="stylesheet" href="styles/games.css">
 </head>
-<Body>
-    <h1> Welcome to the games page! Play any game by clicking on it.</h1>
+<body>
 
-    <br>
+    <header>
+        <h1>Games</h1>
+        <p class="subtitle">Click a game to play it! (all games played in web)</p>
+    </header>
 
-    <div class="buttons-left">
+    <main class="games-container">
 
+        <!-- Game 1 -->
+        <a href="Playable/JAB/index.html" class="game-card">
+            <div class="game-info">
+                <h2>Just a block</h2>
+                <p>A game about a block in the middle of nowhere.</p>
+            </div>
+        </a>
+        
+        
 
-    </div>
-    
+        <a href="Playable/Modern Pong/pong.html" class="game-card">
+            <div class="game-info">
+                <h2>Modern Pong</h2>
+                <p>Pong... But modern. W + S for left side, Up Arrow and Down Arrow for right. (Warning: This game is fully made by ChatGPT)</p>
+            </div>
+        </a> 
+        <!-- Copy this block for each new game -->
 
-    <br>
+    </main>
 
-  
+    <a href="../index.html">
+        <button class="btn">Back</button>
+    </a>
 
-   <div class="btn-bg">
-     <a href="https://explysm.github.io/yikegame-website">
-    <button class="Back">Back</button>
-     </a>
-     <a href="Playable/JAB/index.html">
-        <button class="btn">Just a block.</button>
-     </a>
-   </div>
-</Body>
+    <script>
+  // Apply fade-in on page load
+  document.body.classList.add('fade-enter');
+  setTimeout(() => {
+    document.body.classList.add('fade-enter-active');
+  }, 10);
+
+  // Intercept clicks on links to apply fade-out
+  document.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+
+      // Only do this for internal links
+      if (href && !href.startsWith('http')) {
+        e.preventDefault();
+        document.body.classList.remove('fade-enter-active');
+        document.body.classList.add('fade-exit-active');
+
+        setTimeout(() => {
+          window.location.href = href;
+        }, 500); // match transition duration
+      }
+    });
+  });
+</script>
+</body>
+</html>
