@@ -93,7 +93,7 @@ header .subtitle {
     font-size: 1.3rem;
     padding: 10px 25px;
     border-radius: 12px;
-    margin-top: 15px;
+    margin-top: 2px;
     transition: all 0.3s ease;
 }
 
@@ -110,6 +110,7 @@ header .subtitle {
     gap: 10px;
     justify-content: center;
     margin-top: 9px;
+    margin-bottom: 12px;
 }
 
 .username-change .input-field {
