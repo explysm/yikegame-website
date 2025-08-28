@@ -81,6 +81,57 @@ header .subtitle {
     box-shadow: 0 5px 10px rgba(0,0,0,0.2);
 }
 
+
+/* ---------- LOGIN / REGISTER BUTTON ---------- */
+.login-btn {
+    background: rgba(70,130,180,0.8); /* steel blue */
+    color: #fff;
+    font-size: 1.3rem;
+    padding: 10px 25px;
+    border-radius: 12px;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    background: rgba(70,130,180,1);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* ---------- USERNAME CHANGE INPUT ---------- */
+.username-change {
+    display: none;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 9px;
+}
+
+.username-change .input-field {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+}
+
+.username-btn {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.username-btn:hover {
+    background: rgba(255,255,255,0.35);
+    transform: translateY(-1px);
+}
+
+
 /* ---------- WARNING ---------- */
 .warning1 {
     font-size: 1.2rem;
@@ -172,3 +223,188 @@ header .subtitle {
   opacity: 0;
 }
 
+
+
+/* ---------- GLOBAL CHAT ---------- */
+body.chat-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    padding: 20px;
+}
+
+#chat-container {
+    max-width: 800px;
+    width: 90%;
+    height: 400px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 20px auto;
+    align-items: center; /* center messages horizontally */
+}
+
+#chat-container .forum-thread {
+    background: rgba(255,255,255,0.1);
+    padding: 12px 15px;
+    border-radius: 16px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    font-size: 1.3rem;
+    text-align: center; /* center text inside messages */
+    width: 100%;
+    max-width: 600px; /* keeps messages from being too wide */
+}
+
+#chat-input-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    width: 90%;
+    max-width: 800px;
+}
+
+#message-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 15px;
+    font-size: 1.2rem;
+    border-radius: 12px;
+    border: none;
+    outline: none;
+}
+
+#send-btn {
+    border: none;
+    border-radius: 16px;
+    padding: 12px 30px;
+    font-size: 1.5rem;
+    color: #fff;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#send-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    #chat-container {
+        height: 300px;
+    }
+    #chat-container .forum-thread {
+        font-size: 1.1rem;
+        padding: 10px;
+    }
+    #message-input {
+        font-size: 1rem;
+        padding: 8px 12px;
+    }
+    #send-btn {
+        font-size: 1rem;
+        padding: 8px 15px;
+    }
+}
+
+/* Custom Sb */
+/* ---------- GLOBAL CHAT SCROLLBAR ---------- */
+body.forums-page #chat-container::-webkit-scrollbar {
+    width: 12px;
+}
+
+body.forums-page #chat-container::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+}
+
+body.forums-page #chat-container::-webkit-scrollbar-thumb {
+    background: rgba(51, 53, 54, 0.8);
+    border-radius: 10px;
+    border: 3px solid rgba(255,255,255,0.05);
+}
+
+body.forums-page #chat-container::-webkit-scrollbar-thumb:hover {
+    background: rgb(47, 49, 51);
+}
+
+/* Firefox */
+body.forums-page #chat-container {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(85, 93, 100, 0.8) rgba(255,255,255,0.05);
+}
+
+/* ---------- CENTER CONTENT & MOBILE SCALING ---------- */
+body.forums-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+
+body.forums-page h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+#chat-container {
+    max-width: 800px;
+    width: 100%;
+    height: 400px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+#message-input {
+    font-size: 1.2rem;
+    padding: 10px 15px;
+    border-radius: 12px;
+    border: none;
+    outline: none;
+}
+
+#send-btn {
+    font-size: 1.2rem;
+    padding: 10px 20px;
+    border-radius: 12px;
+    background: rgba(70,130,180,0.8);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#send-btn:hover {
+    background: rgba(70,130,180,1);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    body.forums-page h1 {
+        font-size: 1.6rem;
+    }
+    #chat-container {
+        height: 300px;
+    }
+    #message-input, #send-btn {
+        font-size: 1rem;
+        padding: 8px 12px;
+    }
+}
