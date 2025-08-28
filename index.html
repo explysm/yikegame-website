@@ -29,11 +29,21 @@
   const analytics = getAnalytics(app);
   const auth = getAuth(app);
   const db = getDatabase(app);
+  
 
   // Show username and toggle username-change input
   onAuthStateChanged(auth, async (user) => {
     const usernameEl = document.getElementById("username-display");
     const changeDiv = document.getElementById("username-change");
+    const earlyAccessBtn = document.getElementById("early-access-btn");
+
+    if (user) {
+      earlyAccessBtn.style.display = "block";
+    }
+    else {
+      earlyAccessBtn.style.display = "none";
+    }  
+
 
     if (user) {
       // Load displayName from Realtime DB if exists
@@ -105,6 +115,7 @@
 </section>
 
 <section class="buttons-center">
+    <button id="early-access-btn" class="btn" style="display:none;">Early Access Games</button>  
     <a href="games/games.html"><button class="btn">Games</button></a>
     <a href="other/aboutme.html"><button class="btn">About Me</button></a>
     <a href="other/chat.html"><button class="btn">Global Chat</button></a>

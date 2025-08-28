@@ -412,3 +412,18 @@ body.forums-page h1 {
         padding: 8px 12px;
     }
 }
+/* rEGISTER pERKS */
+
+.perks {
+    max-width: 600px;
+    width: 90%;
+    margin: 40px auto;
+    padding: 30px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+
+    flex-direction: column;
+}
