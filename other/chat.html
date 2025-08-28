@@ -84,5 +84,24 @@ messageInput.addEventListener("keydown", e => {
   <input type="text" id="message-input" placeholder="Type your message..." style="flex:1; min-width:200px; padding:10px; font-size:1.2rem; border-radius:12px; border:none; outline:none;">
   <button id="send-btn" class="username-btn">Send</button>
 </div>
+
+<script>
+  document.body.classList.add('fade-enter');
+  setTimeout(() => {
+    document.body.classList.add('fade-enter-active');
+  }, 10);
+
+  document.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href && !href.startsWith('http')) {
+        e.preventDefault();
+        document.body.classList.remove('fade-enter-active');
+        document.body.classList.add('fade-exit-active');
+        setTimeout(() => { window.location.href = href; }, 500);
+      }
+    });
+  });
+</script>
 </body>
 </html>

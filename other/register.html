@@ -24,7 +24,7 @@
   const auth = getAuth(app);
 
   window.registerUser = async function() {
-    const email = document.getElementById("email").value;
+    const email = document.getElementById("mail").value;
     const password = document.getElementById("password").value;
 
     try {
@@ -39,7 +39,7 @@
 </head>
 <body>
 <header>
-  <h1>Register for YikeGames</h1>
+  <h1>Register</h1>
 </header>
 
 <section class="login-form">
@@ -50,6 +50,10 @@
       <a href="login.html" style="color:#46a2b4; text-decoration:underline;">Login here</a>
   </p>
 </section>
+
+<p class="required">You are not required to use an actual email, emails are not verified.</p>
+
+<a href="/index.html" class="btn">Back</button></a>
 
 <style>
   .login-form {
@@ -71,5 +75,24 @@
   }
   .input-field::placeholder { color: #ddd; }
 </style>
+
+<script>
+  document.body.classList.add('fade-enter');
+  setTimeout(() => {
+    document.body.classList.add('fade-enter-active');
+  }, 10);
+
+  document.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href && !href.startsWith('http')) {
+        e.preventDefault();
+        document.body.classList.remove('fade-enter-active');
+        document.body.classList.add('fade-exit-active');
+        setTimeout(() => { window.location.href = href; }, 500);
+      }
+    });
+  });
+</script>
 </body>
 </html>
