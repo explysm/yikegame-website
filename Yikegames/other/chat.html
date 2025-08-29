@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" class="forums-page">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Chat</title>
+<link rel="stylesheet" href="../styles/style.css">
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
+  authDomain: "yikegames-website.firebaseapp.com",
+  databaseURL: "https://yikegames-website-default-rtdb.firebaseio.com/",
+  projectId: "yikegames-website",
+  storageBucket: "yikegames-website.firebasestorage.app",
+  messagingSenderId: "1086586566551",
+  appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
+  measurementId: "G-FXH0D07D86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+let currentUserName = "Anonymous";
+
+// Set username if logged in
+onAuthStateChanged(auth, user => {
+  if(user) currentUserName = user.displayName || user.email;
+});
+
+// DOM Elements
+const chatContainer = document.getElementById("chat-container");
+const messageInput = document.getElementById("message-input");
+const sendBtn = document.getElementById("send-btn");
+
+// Listen for messages
+const messagesRef = ref(db, "global-chat");
+onValue(messagesRef, snapshot => {
+  chatContainer.innerHTML = "";
+  const data = snapshot.val();
+  if(!data) return;
+
+  // Sort by timestamp
+  const messagesArray = Object.entries(data).sort((a,b) => a[1].timestamp - b[1].timestamp);
+
+  messagesArray.forEach(([id, msg]) => {
+    const div = document.createElement("div");
+    div.classList.add("forum-thread");
+    div.style.padding = "10px";
+    div.style.fontSize = "1.3rem";
+    div.innerHTML = `<strong>${msg.author}:</strong> ${msg.text}`;
+    chatContainer.appendChild(div);
+  });
+
+  // Scroll to bottom
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+});
+
+// Send message
+sendBtn.addEventListener("click", () => {
+  const text = messageInput.value.trim();
+  if(!text) return;
+  const newMsgRef = push(messagesRef);
+  set(newMsgRef, { author: currentUserName, text, timestamp: Date.now() });
+  messageInput.value = "";
+});
+
+// Allow Enter key to send
+messageInput.addEventListener("keydown", e => {
+  if(e.key === "Enter") sendBtn.click();
+});
+</script>
+</head>
+<body class="forums-page">
+<h1>Global Chat</h1>
+
+<div id="chat-container" style="max-width: 800px; width: 90%; margin:20px auto; height:400px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+
+<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:50px;">
+  <input type="text" id="message-input" placeholder="Type your message..." style="flex:1; min-width:200px; padding:10px; font-size:1.2rem; border-radius:12px; border:none; outline:none;">
+  <button id="send-btn" class="username-btn">Send</button>
+</div>
+
+<script>
+  document.body.classList.add('fade-enter');
+  setTimeout(() => {
+    document.body.classList.add('fade-enter-active');
+  }, 10);
+
+  document.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href && !href.startsWith('http')) {
+        e.preventDefault();
+        document.body.classList.remove('fade-enter-active');
+        document.body.classList.add('fade-exit-active');
+        setTimeout(() => { window.location.href = href; }, 500);
+      }
+    });
+  });
+</script>
+
+<a href="/index.html" class="btn">Back</button></a>
+</body>
+</html>

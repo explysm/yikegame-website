@@ -1,0 +1,125 @@
+/* ---------- BODY ---------- */
+body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(270deg, #b1aeb1, #747174, #575557);
+    background-size: 800% 800%;
+    animation: gradientShift 15s ease infinite;
+    font-family: "SF-Pro-Light", sans-serif;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* ---------- GRADIENT ANIMATION ---------- */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* ---------- GAME WINDOW ---------- */
+.game-window {
+    width: 90%;
+    max-width: 1232px;
+    margin: 40px auto 20px;
+}
+
+.game-window iframe {
+    width: 100%;
+    height: 600px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+/* ---------- GAME DESCRIPTION ---------- */
+.about {
+    max-width: 600px;
+    width: 90%;
+    margin: 20px auto 40px;
+    padding: 20px 25px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.about h1 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+.about p {
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* ---------- BACK BUTTON ---------- */
+.btn {
+    border: none;
+    border-radius: 16px;
+    padding: 12px 25px;
+    font-size: 1.3rem;
+    color: #fff;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    cursor: pointer;
+    margin-bottom: 40px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+/* ---------- MEDIA QUERIES ---------- */
+@media (max-width: 1024px) {
+    .game-window iframe { height: 500px; }
+    .about h1 { font-size: 1.8rem; }
+    .about p { font-size: 0.95rem; }
+    .btn { font-size: 1.1rem; padding: 10px 20px; }
+}
+
+@media (max-width: 768px) {
+    .game-window iframe { height: 400px; }
+    .about h1 { font-size: 1.6rem; }
+    .about p { font-size: 0.9rem; }
+    .btn { font-size: 1rem; padding: 8px 18px; }
+}
+
+@media (max-width: 480px) {
+    .game-window iframe { height: 300px; }
+    .about h1 { font-size: 1.4rem; }
+    .about p { font-size: 0.85rem; }
+    .btn { font-size: 0.95rem; padding: 6px 15px; }
+}
+
+/* Remove blue tap highlight on mobile */
+a, button {
+    -webkit-tap-highlight-color: transparent; /* Chrome, Safari, Opera */
+    tap-highlight-color: transparent;         /* Some other browsers */
+}
+
+/* Fade in/out effect for pages */
+.fade-enter {
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
+}
+
+.fade-enter-active {
+  opacity: 1;
+}
+
+.fade-exit {
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+}
+
+.fade-exit-active {
+  opacity: 0;
+}
