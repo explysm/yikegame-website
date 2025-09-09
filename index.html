@@ -140,6 +140,11 @@
   <h2>Latest Updates</h2>
   <ul id="commit-list"></ul>
 </section>
+  
+<section id="commits" class="updates">
+  <h2>Latest Game Commits</h2>
+  <ul id="commit-list-games"></ul>
+</section>
 
 <script>
 async function loadCommits() {
@@ -147,6 +152,24 @@ async function loadCommits() {
   const response = await fetch(`https://api.github.com/repos/${repo}/commits`);
   const commits = await response.json();
   const list = document.getElementById("commit-list");
+  list.innerHTML = "";
+  commits.slice(0, 5).forEach(c => {
+    const li = document.createElement("li");
+    li.innerHTML = `<strong>${c.commit.author.name}</strong>: ${c.commit.message} 
+                    <br><small>${new Date(c.commit.author.date).toLocaleString()}</small>`;
+    list.appendChild(li);
+  });
+}
+loadCommits();
+</script>
+
+  
+<script>
+async function loadCommits() {
+  const repo = "explysm/Games";
+  const response = await fetch(`https://api.github.com/repos/${repo}/commits`);
+  const commits = await response.json();
+  const list = document.getElementById("commit-list-games");
   list.innerHTML = "";
   commits.slice(0, 5).forEach(c => {
     const li = document.createElement("li");
