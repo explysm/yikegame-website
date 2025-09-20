@@ -6,69 +6,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="../styles/style.css">
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
-    authDomain: "yikegames-website.firebaseapp.com",
-    projectId: "yikegames-website",
-    storageBucket: "yikegames-website.firebasestorage.app",
-    messagingSenderId: "1086586566551",
-    appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
-    measurementId: "G-FXH0D07D86"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  window.registerUser = async function() {
-    const email = document.getElementById("mail").value;
-    const password = document.getElementById("password").value;
-
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      alert(`Account created for ${userCredential.user.email}!`);
-      window.location.href = "login.html"; // redirect back to login page
-    } catch (error) {
-      alert(error.message);
-    }
-  }
-</script>
-</head>
-<body>
-<header>
-  <h1>Register</h1>
-</header>
-
-<section class="login-form">
-  <input type="text" id="email" placeholder="Email" class="input-field">
-  <input type="password" id="password" placeholder="Password" class="input-field">
-  <button class="btn login-btn" onclick="registerUser()">Register</button>
-  <p style="margin-top:10px;">Already have an account? 
-      <a href="login.html" style="color:#46a2b4; text-decoration:underline;">Login here</a>
-  </p>
-</section>
-
-<p class="required">You are not required to use an actual email, emails are not verified.</p><br>
-<p class="required">Note: All accounts are made and authenticated through Firebase.</p>
-
-<div class="perks" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:50px;">
- <p class="required">Perks of registering:</p>
- <p>Change username</p>
- <p>Early access games from YikeGames on itch.io</p>
-</div>
-
-<a href="/index.html" class="btn">Back</button></a>
-
 <style>
+  /* All your CSS is now inside this block for a single file solution */
+
+  /* General Form Styling */
   .login-form {
       display: flex;
       flex-direction: column;
       gap: 20px;
       max-width: 400px;
       margin: 50px auto;
+  }
+  .email-input-container {
+      display: flex;
+      gap: 10px;
   }
   .input-field {
       padding: 12px 16px;
@@ -79,11 +30,177 @@
       background: rgba(255,255,255,0.1);
       color: #fff;
       outline: none;
+      flex-grow: 1;
   }
   .input-field::placeholder { color: #ddd; }
-</style>
+  .generate-btn {
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 2px solid #01edf0;
+      background: #0d283c;
+      color: #01edf0;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+  }
+  .generate-btn:hover {
+      background-color: rgba(1, 237, 240, 0.2);
+      box-shadow: 0 0 15px #01edf0;
+  }
 
-<script>
+  /* Styling for notes and perks to create a left-aligned column */
+  .info-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    margin: 30px auto;
+    padding: 0 20px;
+    max-width: 600px;
+  }
+  .required {
+      color: #ddd;
+      font-size: 0.9em;
+      font-style: italic;
+      line-height: 1.4;
+      text-align: left;
+      margin: 0;
+  }
+  .required strong {
+      color: #01edf0;
+      font-weight: bold;
+  }
+  .perks {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 20px 0;
+      border-top: 2px dashed rgba(255, 255, 255, 0.2);
+      border-bottom: 2px dashed rgba(255, 255, 255, 0.2);
+      width: 100%;
+  }
+  .perks p {
+      color: #01edf0;
+      background: rgba(1, 237, 240, 0.1);
+      border: 1px solid #01edf0;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 0.9em;
+      font-weight: bold;
+      text-shadow: 0 0 5px #01edf0;
+      transition: all 0.3s ease;
+  }
+  .perks p:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(1, 237, 240, 0.4);
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Register</h1>
+</header>
+
+<section class="login-form">
+  <input type="text" id="username" placeholder="Username" class="input-field">
+  <div class="email-input-container">
+    <input type="text" id="email" placeholder="Email" class="input-field">
+    <button class="btn generate-btn" id="generate-btn">Generate Email</button>
+  </div>
+  <input type="password" id="password" placeholder="Password" class="input-field">
+  <button class="btn login-btn" onclick="registerUser()">Register</button>
+  <p style="margin-top:10px;">Already have an account? 
+      <a href="login.html" style="color:#46a2b4; text-decoration:underline;">Login here</a>
+  </p>
+</section>
+
+<div class="info-container">
+    <p class="required">You are not required to use an actual email, emails are not verified. If you do <strong>not</strong> want to use an actual email, you are welcome to hit the "Generate Email" button.</p><br><br>
+    <p class="required">Note: All accounts are made and authenticated through Firebase.</p>
+
+    <div class="perks">
+        <p class="required">Perks of registering:</p>
+        <p>Use Global Chat</p>
+        <p>Early access games from YikeGames on itch.io</p>
+        
+    </div>
+</div>
+
+<a href="/index.html" class="btn">Back</button></a>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
+    authDomain: "yikegames-website.firebaseapp.com",
+    databaseURL: "https://yikegames-website-default-rtdb.firebaseio.com/",
+    projectId: "yikegames-website",
+    storageBucket: "yikegames-website.firebasestorage.app",
+    messagingSenderId: "1086586566551",
+    appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
+    measurementId: "G-FXH0D07D86"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  window.registerUser = async function() {
+    const username = document.getElementById("username").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    if (!username || !email || !password) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    try {
+      const usernameSnapshot = await get(child(ref(db), `usernames/${username}`));
+      if (usernameSnapshot.exists()) {
+        alert("This username is already in use. Please choose another.");
+        return;
+      }
+
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      await updateProfile(user, { displayName: username });
+
+      await set(ref(db, 'users/' + user.uid), {
+        displayName: username,
+        email: user.email,
+        isDeveloper: false
+      });
+      await set(ref(db, 'usernames/' + username), user.uid);
+
+      alert(`Account created for ${username}!`);
+      window.location.href = "login.html";
+    } catch (error) {
+      alert(error.message);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const generateBtn = document.getElementById('generate-btn');
+    const emailInput = document.getElementById('email');
+    if (generateBtn && emailInput) {
+      generateBtn.addEventListener('click', () => {
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        const length = 20;
+        for (let i = 0; i < length; i++) {
+          result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        emailInput.value = result + '@gmail.com';
+      });
+    }
+  });
+  
   document.body.classList.add('fade-enter');
   setTimeout(() => {
     document.body.classList.add('fade-enter-active');

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Account Page</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../styles/style.css">
+
+<style>
+  /* You can copy and paste your styles from the old file here if needed */
+</style>
+</head>
+<body>
+    <div class="cursor"></div>
+
+    <header>
+        <h1>My Account</h1>
+    </header>
+
+    <div class="login-container">
+        <h2>Logged in as: <span id="user-display-name"></span></h2>
+        <div class="username-change">
+            <input type="text" id="newUsername" placeholder="New Username" class="input-field">
+            <button class="btn username-btn" onclick="changeUsername()">Change</button>
+        </div>
+        <br>
+        <div class="logout-btn-container">
+            <button class="btn" onclick="logout()">Log Out</button>
+        </div>
+    </div>
+
+    <div id="dev-management-section" style="display: none;" class="login-container new-post-form">
+        <h2>Developer Management</h2>
+        <input type="email" id="dev-email-input" placeholder="Enter user's email" class="input-field">
+        <button id="toggle-dev-btn" class="btn username-btn">Toggle Developer Status</button>
+        <p id="dev-status-message"></p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+        import { getDatabase, ref, get, set, remove, query, orderByChild, equalTo, update as dbUpdate } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
+          authDomain: "yikegames-website.firebaseapp.com",
+          projectId: "yikegames-website",
+          databaseURL: "https://yikegames-website-default-rtdb.firebaseio.com/",
+          storageBucket: "yikegames-website.firebasestorage.app",
+          messagingSenderId: "1086586566551",
+          appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
+          measurementId: "G-FXH0D07D86"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        const devManagementSection = document.getElementById("dev-management-section");
+        const devEmailInput = document.getElementById("dev-email-input");
+        const toggleDevBtn = document.getElementById("toggle-dev-btn");
+        const devStatusMessage = document.getElementById("dev-status-message");
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById("user-display-name").textContent = user.displayName || user.email;
+                
+                // Get user's developer status from the database
+                const userRef = ref(db, `users/${user.uid}`);
+                const snapshot = await get(userRef);
+                const userData = snapshot.val();
+
+                if (userData && userData.isDeveloper) {
+                    devManagementSection.style.display = "flex";
+                } else {
+                    devManagementSection.style.display = "none";
+                }
+
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        window.changeUsername = async function() {
+            const newUsername = document.getElementById("newUsername").value.trim();
+            const user = auth.currentUser;
+            if (!user) return alert("You must be logged in to change your username!");
+            if (!newUsername) return alert("Please enter a username!");
+
+            try {
+                // Check if the new username is already taken
+                const usernameRef = ref(db, `usernames/${newUsername}`);
+                const usernameSnapshot = await get(usernameRef);
+                if (usernameSnapshot.exists()) {
+                    alert("That username is already taken. Please choose another.");
+                    return;
+                }
+
+                // Get the old username from the current user data
+                const oldUsername = user.displayName;
+
+                // Delete the old username from the public list
+                if (oldUsername) {
+                    const oldUsernameRef = ref(db, `usernames/${oldUsername}`);
+                    await remove(oldUsernameRef);
+                }
+
+                // Update the username in Firebase Auth
+                await updateProfile(user, { displayName: newUsername });
+
+                // Update the user's displayName in the private 'users' node
+                await dbUpdate(ref(db, `users/${user.uid}`), { displayName: newUsername });
+
+                // Add the new username to the public list
+                await set(ref(db, `usernames/${newUsername}`), user.uid);
+
+                document.getElementById("user-display-name").textContent = newUsername;
+                alert("Username updated successfully!");
+                document.getElementById("newUsername").value = "";
+            } catch (error) {
+                alert("Failed to change username: " + error.message);
+            }
+        };
+
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                window.location.href = "../index.html";
+            } catch (error) {
+                console.error("Error signing out: ", error);
+            }
+        };
+
+        toggleDevBtn.addEventListener('click', async () => {
+            const email = devEmailInput.value.trim();
+            if (!email) {
+                devStatusMessage.textContent = "Please enter an email.";
+                return;
+            }
+
+            try {
+                const usersRef = ref(db, 'users');
+                const usersQuery = query(usersRef, orderByChild('email'), equalTo(email));
+                const snapshot = await get(usersQuery);
+
+                if (snapshot.exists()) {
+                    let userKey = Object.keys(snapshot.val())[0];
+                    let userData = snapshot.val()[userKey];
+                    let newStatus = !userData.isDeveloper;
+
+                    await dbUpdate(ref(db, `users/${userKey}`), { isDeveloper: newStatus });
+                    devStatusMessage.textContent = `${email} is now ${newStatus ? 'a developer' : 'not a developer'}.`;
+                    devEmailInput.value = '';
+                } else {
+                    devStatusMessage.textContent = `User with email "${email}" not found.`;
+                }
+            } catch (error) {
+                console.error("Error toggling developer status:", error);
+                devStatusMessage.textContent = `Error: ${error.message}`;
+            }
+        });
+
+        // Page transition scripts
+        document.body.classList.add('fade-enter');
+        setTimeout(() => {
+            document.body.classList.add('fade-enter-active');
+        }, 10);
+    </script>
+</body>
+</html>

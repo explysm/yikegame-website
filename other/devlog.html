@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog Posts</title>
+<link rel="stylesheet" href="../styles/style.css">
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getDatabase, ref, onValue, push, set, get } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+  import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
+    authDomain: "yikegames-website.firebaseapp.com",
+    databaseURL: "https://yikegames-website-default-rtdb.firebaseio.com/",
+    projectId: "yikegames-website",
+    storageBucket: "yikegames-website.firebasestorage.app",
+    messagingSenderId: "1086586566551",
+    appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
+    measurementId: "G-FXH0D07D86"
+  };
+
+  const CLOUDINARY_CLOUD_NAME = "dhptbygpt";
+  const CLOUDINARY_UPLOAD_PRESET = "unsigned_upload";
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  const postsContainer = document.getElementById("posts-container");
+  const newPostSection = document.getElementById("new-post-section");
+  const postTitleInput = document.getElementById("post-title");
+  const postContentInput = document.getElementById("post-content");
+  const postImageInput = document.getElementById("post-image");
+  const createPostBtn = document.getElementById("create-post-btn");
+
+  // Check for developer status
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const userRef = ref(db, 'users/' + user.uid);
+      const snapshot = await get(userRef);
+      if (snapshot.exists() && snapshot.val().isDeveloper) {
+        newPostSection.style.display = "flex";
+      } else {
+        newPostSection.style.display = "none";
+      }
+    } else {
+      newPostSection.style.display = "none";
+    }
+  });
+
+  // Get and display posts in real-time
+  const postsRef = ref(db, "posts");
+  onValue(postsRef, (snapshot) => {
+    postsContainer.innerHTML = "";
+    const postsData = snapshot.val();
+
+    if (postsData) {
+      const sortedPosts = Object.values(postsData).sort((a, b) => b.timestamp - a.timestamp);
+
+      sortedPosts.forEach(post => {
+        const postElement = document.createElement("div");
+        postElement.classList.add("post-item");
+        postElement.innerHTML = `
+          <div class="post-content">
+            <h3>${post.title}</h3>
+            <p>${post.content}</p>
+            ${post.imageUrl ? `<img src="${post.imageUrl}" alt="${post.title}" class="post-image-preview">` : ''}
+            <small>By ${post.author} on ${new Date(post.timestamp).toLocaleString()}</small>
+          </div>
+          <div class="divider"></div>
+        `;
+        postsContainer.appendChild(postElement);
+      });
+    } else {
+      postsContainer.innerHTML = '<p class="info-message">No posts yet. Be the first to create one!</p>';
+    }
+  });
+
+  // Handle new post creation with Cloudinary upload
+  createPostBtn.addEventListener("click", async () => {
+    const title = postTitleInput.value.trim();
+    const content = postContentInput.value.trim();
+    const imageFile = postImageInput.files[0];
+    const user = auth.currentUser;
+
+    if (!user) {
+      alert("You must be logged in to create a post.");
+      return;
+    }
+
+    const userRef = ref(db, 'users/' + user.uid);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists() || !snapshot.val().isDeveloper) {
+      alert("You do not have permission to create posts.");
+      return;
+    }
+
+    if (!title || !content) {
+      alert("Please enter a title and content for your post.");
+      return;
+    }
+
+    let imageUrl = null;
+
+    if (imageFile) {
+        const formData = new FormData();
+        formData.append("file", imageFile);
+        formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+        try {
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                method: "POST",
+                body: formData,
+            });
+            const data = await response.json();
+            if (response.ok) {
+                imageUrl = data.secure_url;
+            } else {
+                console.error("Cloudinary upload failed:", data);
+                alert("Image upload failed. Please try again.");
+                return;
+            }
+        } catch (error) {
+            console.error("Cloudinary request failed:", error);
+            alert("Image upload failed. Please check your internet connection.");
+            return;
+        }
+    }
+
+    const newPostRef = push(ref(db, "posts"));
+    set(newPostRef, {
+      title,
+      content,
+      imageUrl,
+      author: user.displayName || user.email,
+      timestamp: Date.now()
+    });
+
+    postTitleInput.value = "";
+    postContentInput.value = "";
+    postImageInput.value = "";
+    alert("Post created successfully!");
+  });
+
+  // Image Maximizing Functionality (remains the same as before)
+  function maximizeImage(imageSrc) {
+      const overlay = document.createElement('div');
+      overlay.classList.add('image-overlay');
+      const imageContainer = document.createElement('div');
+      imageContainer.classList.add('image-container');
+      const maximizedImg = document.createElement('img');
+      maximizedImg.src = imageSrc;
+      maximizedImg.classList.add('maximized-image');
+      const closeBtn = document.createElement('span');
+      closeBtn.classList.add('close-btn');
+      closeBtn.innerHTML = '&times;';
+      closeBtn.onclick = () => { document.body.removeChild(overlay); };
+      imageContainer.appendChild(maximizedImg);
+      imageContainer.appendChild(closeBtn);
+      overlay.appendChild(imageContainer);
+      document.body.appendChild(overlay);
+      overlay.onclick = (e) => {
+          if (e.target.classList.contains('image-overlay')) {
+              document.body.removeChild(overlay);
+          }
+      };
+  }
+
+  postsContainer.addEventListener('click', (e) => {
+      const clickedElement = e.target;
+      if (clickedElement.classList.contains('post-image-preview')) {
+          const imageUrl = clickedElement.src;
+          maximizeImage(imageUrl);
+      }
+  });
+
+</script>
+</head>
+<body>
+    <header>
+        <h1>Dev Log</h1>
+    </header>
+
+    <a href="/index.html" class="btn back-btn">Back to Home</a>
+    
+    <div id="new-post-section" class="login-container new-post-form">
+      <h2>Create a New Post</h2>
+      <input type="text" id="post-title" placeholder="Post Title" class="input-field">
+      <textarea id="post-content" placeholder="Post Content" class="input-field"></textarea>
+      <label for="post-image" class="file-label btn">Choose Image</label>
+      <input type="file" id="post-image" accept="image/*" class="file-input">
+      <button id="create-post-btn" class="btn username-btn">Create Post</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div id="posts-container" class="posts-list-container"></div>
+    
+    <script>
+      document.body.classList.add('fade-enter');
+      setTimeout(() => {
+        document.body.classList.add('fade-enter-active');
+      }, 10);
+    
+      document.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function(e) {
+          const href = this.getAttribute('href');
+          if (href && !href.startsWith('http')) {
+            e.preventDefault();
+            document.body.classList.remove('fade-enter-active');
+            document.body.classList.add('fade-exit-active');
+            setTimeout(() => { window.location.href = href; }, 500);
+          }
+        });
+      });
+    </script>
+</body>
+</html>
