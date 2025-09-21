@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="../styles/style.css">
 
 <style>
-  /* You can copy and paste your styles from the old file here if needed */
+  /* Your CSS styles should go here, as per your original file structure */
 </style>
 </head>
 <body>
@@ -29,6 +29,16 @@
         </div>
     </div>
 
+    <div class="pfp-container">
+       <div class="pfp-display-container">
+         <h3>Profile Picture</h3>
+          <img id="pfp-display" src="https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png" alt="Profile Picture" class="pfp-image">
+       </div>
+       <div class="pfp-change">
+         <input type="file" id="pfp-input" class="pfp-input-field" accept="image/*">
+        <button class="btn pfp-btn" onclick="changePfp()">Change PFP</button>
+       </div>
+    </div>
     <div id="dev-management-section" style="display: none;" class="login-container new-post-form">
         <h2>Developer Management</h2>
         <input type="email" id="dev-email-input" placeholder="Enter user's email" class="input-field">
@@ -37,134 +47,185 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-        import { getDatabase, ref, get, set, remove, query, orderByChild, equalTo, update as dbUpdate } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getDatabase, ref, get, set, remove, query, orderByChild, equalTo, update as dbUpdate } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-        const firebaseConfig = {
-          apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
-          authDomain: "yikegames-website.firebaseapp.com",
-          projectId: "yikegames-website",
-          databaseURL: "https://yikegames-website-default-rtdb.firebaseio.com/",
-          storageBucket: "yikegames-website.firebasestorage.app",
-          messagingSenderId: "1086586566551",
-          appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
-          measurementId: "G-FXH0D07D86"
-        };
+const firebaseConfig = {
+    apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
+    authDomain: "yikegames-website.firebaseapp.com",
+    projectId: "yikegames-website",
+    databaseURL: "https://yikegames-website-default-rtdb.firebaseio.com/",
+    storageBucket: "yikegames-website.firebasestorage.app",
+    messagingSenderId: "1086586566551",
+    appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
+    measurementId: "G-FXH0D07D86"
+};
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-        const devManagementSection = document.getElementById("dev-management-section");
-        const devEmailInput = document.getElementById("dev-email-input");
-        const toggleDevBtn = document.getElementById("toggle-dev-btn");
-        const devStatusMessage = document.getElementById("dev-status-message");
+const devManagementSection = document.getElementById("dev-management-section");
+const devEmailInput = document.getElementById("dev-email-input");
+const toggleDevBtn = document.getElementById("toggle-dev-btn");
+const devStatusMessage = document.getElementById("dev-status-message");
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                document.getElementById("user-display-name").textContent = user.displayName || user.email;
-                
-                // Get user's developer status from the database
-                const userRef = ref(db, `users/${user.uid}`);
-                const snapshot = await get(userRef);
-                const userData = snapshot.val();
+const CLOUDINARY_CLOUD_NAME = "dhptbygpt";
+const CLOUDINARY_UPLOAD_PRESET = "unsigned_upload";
 
-                if (userData && userData.isDeveloper) {
-                    devManagementSection.style.display = "flex";
-                } else {
-                    devManagementSection.style.display = "none";
-                }
+const pfpDisplay = document.getElementById("pfp-display");
+const pfpInput = document.getElementById("pfp-input");
 
-            } else {
-                window.location.href = "login.html";
-            }
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        document.getElementById("user-display-name").textContent = user.displayName || user.email;
+
+        // Set the profile picture from Firebase Auth or a default
+        if (user.photoURL) {
+            pfpDisplay.src = user.photoURL;
+        } else {
+            pfpDisplay.src = "https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png";
+        }
+
+        // Get user's developer status from the database
+        const userRef = ref(db, `users/${user.uid}`);
+        const snapshot = await get(userRef);
+        const userData = snapshot.val();
+
+        if (userData && userData.isDeveloper) {
+            devManagementSection.style.display = "flex";
+        } else {
+            devManagementSection.style.display = "none";
+        }
+    } else {
+        window.location.href = "login.html";
+    }
+});
+
+window.changeUsername = async function() {
+    const newUsername = document.getElementById("newUsername").value.trim();
+    const user = auth.currentUser;
+    if (!user) return alert("You must be logged in to change your username!");
+    if (!newUsername) return alert("Please enter a username!");
+
+    try {
+        const usernameRef = ref(db, `usernames/${newUsername}`);
+        const usernameSnapshot = await get(usernameRef);
+        if (usernameSnapshot.exists()) {
+            alert("That username is already taken. Please choose another.");
+            return;
+        }
+
+        const oldUsername = user.displayName;
+
+        if (oldUsername) {
+            const oldUsernameRef = ref(db, `usernames/${oldUsername}`);
+            await remove(oldUsernameRef);
+        }
+
+        await updateProfile(user, { displayName: newUsername });
+        await dbUpdate(ref(db, `users/${user.uid}`), { displayName: newUsername });
+        await set(ref(db, `usernames/${newUsername}`), user.uid);
+
+        document.getElementById("user-display-name").textContent = newUsername;
+        alert("Username updated successfully!");
+        document.getElementById("newUsername").value = "";
+    } catch (error) {
+        alert("Failed to change username: " + error.message);
+    }
+};
+
+window.changePfp = async function() {
+    const file = pfpInput.files[0];
+    const user = auth.currentUser;
+
+    if (!user) {
+        alert("You must be logged in to change your profile picture!");
+        return;
+    }
+    if (!file) {
+        alert("Please select an image to upload!");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+    try {
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+            method: 'POST',
+            body: formData,
         });
 
-        window.changeUsername = async function() {
-            const newUsername = document.getElementById("newUsername").value.trim();
-            const user = auth.currentUser;
-            if (!user) return alert("You must be logged in to change your username!");
-            if (!newUsername) return alert("Please enter a username!");
+        if (!response.ok) {
+            throw new Error('Cloudinary upload failed!');
+        }
 
-            try {
-                // Check if the new username is already taken
-                const usernameRef = ref(db, `usernames/${newUsername}`);
-                const usernameSnapshot = await get(usernameRef);
-                if (usernameSnapshot.exists()) {
-                    alert("That username is already taken. Please choose another.");
-                    return;
-                }
+        const data = await response.json();
+        const imageUrl = data.secure_url;
 
-                // Get the old username from the current user data
-                const oldUsername = user.displayName;
+        // Update user's photoURL in Firebase Auth
+        await updateProfile(user, { photoURL: imageUrl });
 
-                // Delete the old username from the public list
-                if (oldUsername) {
-                    const oldUsernameRef = ref(db, `usernames/${oldUsername}`);
-                    await remove(oldUsernameRef);
-                }
+        // Update user's photoURL in the private 'users' node
+        await dbUpdate(ref(db, `users/${user.uid}`), { photoURL: imageUrl });
 
-                // Update the username in Firebase Auth
-                await updateProfile(user, { displayName: newUsername });
+        // Update the image on the page
+        pfpDisplay.src = imageUrl;
 
-                // Update the user's displayName in the private 'users' node
-                await dbUpdate(ref(db, `users/${user.uid}`), { displayName: newUsername });
+        alert("Profile picture updated successfully!");
+    } catch (error) {
+        console.error("Failed to change profile picture:", error);
+        alert("Failed to change profile picture: " + error.message);
+    }
+};
 
-                // Add the new username to the public list
-                await set(ref(db, `usernames/${newUsername}`), user.uid);
+window.logout = async function() {
+    try {
+        await signOut(auth);
+        window.location.href = "../index.html";
+    } catch (error) {
+        console.error("Error signing out: ", error);
+    }
+};
 
-                document.getElementById("user-display-name").textContent = newUsername;
-                alert("Username updated successfully!");
-                document.getElementById("newUsername").value = "";
-            } catch (error) {
-                alert("Failed to change username: " + error.message);
-            }
-        };
+toggleDevBtn.addEventListener('click', async () => {
+    const email = devEmailInput.value.trim();
+    if (!email) {
+        devStatusMessage.textContent = "Please enter an email.";
+        return;
+    }
 
-        window.logout = async function() {
-            try {
-                await signOut(auth);
-                window.location.href = "../index.html";
-            } catch (error) {
-                console.error("Error signing out: ", error);
-            }
-        };
+    try {
+        const usersRef = ref(db, 'users');
+        const usersQuery = query(usersRef, orderByChild('email'), equalTo(email));
+        const snapshot = await get(usersQuery);
 
-        toggleDevBtn.addEventListener('click', async () => {
-            const email = devEmailInput.value.trim();
-            if (!email) {
-                devStatusMessage.textContent = "Please enter an email.";
-                return;
-            }
+        if (snapshot.exists()) {
+            let userKey = Object.keys(snapshot.val())[0];
+            let userData = snapshot.val()[userKey];
+            let newStatus = !userData.isDeveloper;
 
-            try {
-                const usersRef = ref(db, 'users');
-                const usersQuery = query(usersRef, orderByChild('email'), equalTo(email));
-                const snapshot = await get(usersQuery);
+            await dbUpdate(ref(db, `users/${userKey}`), { isDeveloper: newStatus });
+            devStatusMessage.textContent = `${email} is now ${newStatus ? 'a developer' : 'not a developer'}.`;
+            devEmailInput.value = '';
+        } else {
+            devStatusMessage.textContent = `User with email "${email}" not found.`;
+        }
+    } catch (error) {
+        console.error("Error toggling developer status:", error);
+        devStatusMessage.textContent = `Error: ${error.message}`;
+    }
+});
 
-                if (snapshot.exists()) {
-                    let userKey = Object.keys(snapshot.val())[0];
-                    let userData = snapshot.val()[userKey];
-                    let newStatus = !userData.isDeveloper;
+// Page transition scripts
+document.body.classList.add('fade-enter');
+setTimeout(() => {
+    document.body.classList.add('fade-enter-active');
+}, 10);
 
-                    await dbUpdate(ref(db, `users/${userKey}`), { isDeveloper: newStatus });
-                    devStatusMessage.textContent = `${email} is now ${newStatus ? 'a developer' : 'not a developer'}.`;
-                    devEmailInput.value = '';
-                } else {
-                    devStatusMessage.textContent = `User with email "${email}" not found.`;
-                }
-            } catch (error) {
-                console.error("Error toggling developer status:", error);
-                devStatusMessage.textContent = `Error: ${error.message}`;
-            }
-        });
-
-        // Page transition scripts
-        document.body.classList.add('fade-enter');
-        setTimeout(() => {
-            document.body.classList.add('fade-enter-active');
-        }, 10);
     </script>
 </body>
 </html>
