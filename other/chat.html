@@ -71,6 +71,7 @@
   const auth = getAuth(app);
 
   let currentUserData = null;
+  const usersCache = {}; // Cache to store user data for faster lookup
 
   // Paste your Discord webhook URL here.
   // WARNING: This URL will be publicly visible in your open-source code.
@@ -81,6 +82,13 @@
   const messageInput = document.getElementById("message-input");
   const sendBtn = document.getElementById("send-btn");
   const chatStatus = document.getElementById("chat-status");
+
+  // Function to get pfp URL from cache
+  function getPfpUrl(authorName) {
+    const userKeys = Object.keys(usersCache);
+    const user = userKeys.find(key => usersCache[key].displayName === authorName || usersCache[key].email === authorName);
+    return user && usersCache[user].photoURL ? usersCache[user].photoURL : "https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png";
+  }
 
   // Authentication and Presence System
   onAuthStateChanged(auth, async user => {
@@ -119,6 +127,15 @@
     }
   });
 
+  // Listen for user data to populate cache
+  const usersRef = ref(db, "users");
+  onValue(usersRef, snapshot => {
+    const usersData = snapshot.val();
+    if (usersData) {
+      Object.assign(usersCache, usersData);
+    }
+  });
+
   // Listen for messages
   const messagesRef = ref(db, "global-chat");
   onValue(messagesRef, snapshot => {
@@ -140,12 +157,17 @@
     chatContainer.scrollTop = chatContainer.scrollHeight;
   });
 
-  // Function to send a message to Discord
-  async function sendToDiscord(username, message) {
+  // Function to send a message to Discord with the user's avatar
+  async function sendToDiscord(username, message, avatarUrl) {
     const payload = {
       username: username,
       content: message
     };
+    
+    // Conditionally add the avatar_url if one is provided
+    if (avatarUrl) {
+      payload.avatar_url = avatarUrl;
+    }
 
     try {
       const response = await fetch(discordWebhookUrl, {
@@ -170,16 +192,20 @@
     const text = messageInput.value.trim();
     if (!text) return;
 
+    // Get the display name and photo URL using the getPfpUrl function
+    const displayName = currentUserData.displayName;
+    const photoUrl = getPfpUrl(displayName);
+
     // Send to Firebase (your existing code)
     const newMsgRef = push(ref(db, "global-chat"));
     set(newMsgRef, {
-      author: currentUserData.displayName,
+      author: displayName,
       text,
       timestamp: serverTimestamp()
     });
 
-    // Send to Discord
-    sendToDiscord(currentUserData.displayName, text);
+    // Send to Discord with the user's display name and photo URL
+    sendToDiscord(displayName, text, photoUrl);
 
     // Clear message input
     messageInput.value = "";
