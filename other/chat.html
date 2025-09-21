@@ -72,6 +72,10 @@
 
   let currentUserData = null;
 
+  // Paste your Discord webhook URL here.
+  // WARNING: This URL will be publicly visible in your open-source code.
+  const discordWebhookUrl = "https://discord.com/api/webhooks/1419226962643124336/kOCwAB9OGdalcetSAsG76w-WoaDjLW43y4DmavFgumUn383tY0TwvoEU1Goj4Oz6WeMq";
+
   // DOM Elements
   const chatContainer = document.getElementById("chat-container");
   const messageInput = document.getElementById("message-input");
@@ -136,18 +140,48 @@
     chatContainer.scrollTop = chatContainer.scrollHeight;
   });
 
-  // Send message
+  // Function to send a message to Discord
+  async function sendToDiscord(username, message) {
+    const payload = {
+      username: username,
+      content: message
+    };
+
+    try {
+      const response = await fetch(discordWebhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        console.error("Failed to send message to Discord:", response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error("Error sending message to Discord:", error);
+    }
+  }
+
+  // Send message to Firebase and Discord
   sendBtn.addEventListener("click", () => {
     if (!currentUserData) return; // Prevent sending if not authenticated
 
     const text = messageInput.value.trim();
     if (!text) return;
+
+    // Send to Firebase (your existing code)
     const newMsgRef = push(ref(db, "global-chat"));
     set(newMsgRef, {
       author: currentUserData.displayName,
       text,
       timestamp: serverTimestamp()
     });
+
+    // Send to Discord
+    sendToDiscord(currentUserData.displayName, text);
+
+    // Clear message input
     messageInput.value = "";
   });
 
