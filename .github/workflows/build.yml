@@ -55,4 +55,3 @@ jobs:
           # This provides the necessary token for the action to create the release.
           # This token is automatically provided by GitHub; you don't need to create it.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
