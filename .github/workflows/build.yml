@@ -1,0 +1,50 @@
+# This workflow's name, as it will appear on the Actions tab in GitHub.
+name: Build Electron App
+
+# This specifies the event that triggers the workflow.
+# It will run on every push to the 'app' branch.
+on:
+  push:
+    branches:
+      - app # <-- CHANGED FROM 'main' TO 'app'
+
+# A workflow is composed of one or more jobs that can run sequentially or in parallel.
+jobs:
+  # The name of the job.
+  build:
+    # This specifies the type of machine to run the job on.
+    runs-on: ubuntu-latest
+
+    # The steps that make up this job.
+    steps:
+      # Step 1: Checks out your repository's code under $GITHUB_WORKSPACE.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Sets up a Node.js environment.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # Use a long-term support (LTS) version
+
+      # Step 3: Installs all project dependencies.
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Runs the Electron build command.
+      - name: Build and package the Electron app
+        run: npm run build
+
+      # Step 5: Uploads the built application files as artifacts.
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          # The name of the artifact, so you can easily identify it.
+          name: Electron-Builds
+          # The path to the files to upload.
+          path: dist/
+```eof
+
+### Summary of the Change
+
+By changing the configuration under the `branches:` key to `- app`, you ensure that the automatic build process only triggers when you use the command `git push origin app`. Pushes to any other branch (like `main`, `dev`, or `test`) will not run the workflow. This is a great way to manage **development** builds separate from your **stable** or **production** builds.
