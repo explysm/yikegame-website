@@ -1,12 +1,12 @@
 # This workflow's name, as it will appear on the Actions tab in GitHub.
-name: Build Electron App
+name: Build and Release Electron App
 
 # This specifies the event that triggers the workflow.
 # It will run on every push to the 'app' branch.
 on:
   push:
     branches:
-      - app # <-- CHANGED FROM 'main' TO 'app'
+      - app
 
 # A workflow is composed of one or more jobs that can run sequentially or in parallel.
 jobs:
@@ -35,16 +35,24 @@ jobs:
       - name: Build and package the Electron app
         run: npm run build
 
-      # Step 5: Uploads the built application files as artifacts.
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      # Step 5: Creates a new GitHub Release and uploads the build files.
+      # This step will create a new release with a unique name based on the commit.
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/heads/app')
         with:
-          # The name of the artifact, so you can easily identify it.
-          name: Electron-Builds
-          # The path to the files to upload.
-          path: dist/
-```eof
+          # The name of the release. This will be visible on your repository's Releases page.
+          name: App Build (${{ github.sha }})
+          # Sets a tag for this release. Using the commit hash ensures it's unique.
+          tag_name: build-${{ github.sha }}
+          # The body of the release, which can contain a message.
+          body: This is an automated build from the 'app' branch.
+          # The files to upload from the 'dist' folder created by electron-builder.
+          # The '**' is a wildcard to grab all files inside that folder.
+          files: |
+            dist/*
+        env:
+          # This provides the necessary token for the action to create the release.
+          # This token is automatically provided by GitHub; you don't need to create it.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-### Summary of the Change
-
-By changing the configuration under the `branches:` key to `- app`, you ensure that the automatic build process only triggers when you use the command `git push origin app`. Pushes to any other branch (like `main`, `dev`, or `test`) will not run the workflow. This is a great way to manage **development** builds separate from your **stable** or **production** builds.
