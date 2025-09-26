@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Global Chat</title>
+
+<meta http-equiv="Content-Security-Policy" content="
+    default-src * 'unsafe-inline' 'unsafe-eval'; 
+    connect-src *;
+    script-src * 'unsafe-inline' 'unsafe-eval';
+">
+
+
+
 <link rel="stylesheet" href="../styles/style.css">
 <style>
   /* Basic Chat Styling */
@@ -34,6 +43,15 @@
     font-style: italic;
     color: #aaa;
   }
+/* NEW: Ensure the highlight rule is specific enough to override existing styles */
+  #chat-container .mention-highlight {
+  /* Darker background for visibility */
+  background-color: #555 !important; 
+  /* Green border for emphasis */
+  border-left: 4px solid #00ff00 !important; 
+  padding: 5px;
+  margin-left: -5px; /* Adjust margin to ensure border is visible */
+}
 </style>
 </head>
 <body class="forums-page">
@@ -48,12 +66,12 @@
 
 <p id="chat-status" class="status-message">Please log in to join the chat.</p>
 
-<a href="/index.html" class="btn">Back</button></a>
+<a href="../index.html" class="btn">Back</a>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, set, onDisconnect, child, get, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, set, onDisconnect, get, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
@@ -70,11 +88,12 @@
   const db = getDatabase(app);
   const auth = getAuth(app);
 
-  let currentUserData = null;
+  // --- Core State Variables ---
+  let currentUser = null; // Stores the Firebase Auth User object
+  let currentDisplayName = null; // Stores the name used for chat/mentions
   const usersCache = {}; // Cache to store user data for faster lookup
 
   // Paste your Discord webhook URL here.
-  // WARNING: This URL will be publicly visible in your open-source code.
   const discordWebhookUrl = "https://discord.com/api/webhooks/1419226962643124336/kOCwAB9OGdalcetSAsG76w-WoaDjLW43y4DmavFgumUn383tY0TwvoEU1Goj4Oz6WeMq";
 
   // DOM Elements
@@ -83,28 +102,47 @@
   const sendBtn = document.getElementById("send-btn");
   const chatStatus = document.getElementById("chat-status");
 
-  // Function to get pfp URL from cache
+  // Function to get pfp URL from cache or the logged-in user object
   function getPfpUrl(authorName) {
+    const defaultPfp = "https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png";
+    
+    // Check if the author is the currently logged-in user
+    if (currentUser && currentUser.displayName === authorName && currentUser.photoURL) {
+      return currentUser.photoURL;
+    }
+
+    // Look up user by display name or email in the users cache
     const userKeys = Object.keys(usersCache);
-    const user = userKeys.find(key => usersCache[key].displayName === authorName || usersCache[key].email === authorName);
-    return user && usersCache[user].photoURL ? usersCache[user].photoURL : "https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png";
+    const userKey = userKeys.find(key => usersCache[key].displayName === authorName || usersCache[key].email === authorName);
+    
+    return userKey && usersCache[userKey].photoURL ? usersCache[userKey].photoURL : defaultPfp;
   }
 
-  // Authentication and Presence System
+  // --- Authentication and Presence System ---
   onAuthStateChanged(auth, async user => {
+    currentUser = user; // Set the global user object
+
     if (user) {
+      // 1. Set the initial display name from Auth (most reliable starting point)
+      currentDisplayName = user.displayName || user.email.split('@')[0];
+      
+      // 2. Update UI immediately
       chatStatus.textContent = "Loading chat...";
       messageInput.disabled = false;
       sendBtn.disabled = false;
       messageInput.placeholder = "Type your message...";
       
+      // 3. Fetch richer profile data from the 'users' node
       const userRef = ref(db, `users/${user.uid}`);
       const userSnapshot = await get(userRef);
       if (userSnapshot.exists()) {
-        currentUserData = userSnapshot.val();
+        const userData = userSnapshot.val();
+        // Use the database's name if it exists and is preferred
+        currentDisplayName = userData.displayName || currentDisplayName;
+        // NOTE: We don't store currentUserData globally anymore, we rely on currentDisplayName
       }
 
-      // Set user as online and handle disconnect
+      // 4. Set user as online and handle disconnect
       const onlineRef = ref(db, `.info/connected`);
       onValue(onlineRef, (snapshot) => {
         if (snapshot.val() === true) {
@@ -115,15 +153,12 @@
       });
 
     } else {
-      currentUserData = null;
+      currentDisplayName = null;
+      currentUser = null;
       chatStatus.textContent = "Please log in to join the chat.";
       messageInput.disabled = true;
       sendBtn.disabled = true;
       messageInput.placeholder = "You must be logged in to chat.";
-      // Clear any online status on log out
-      if (user) {
-        set(ref(db, `presence/${user.uid}`), false);
-      }
     }
   });
 
@@ -136,7 +171,7 @@
     }
   });
 
-  // Listen for messages
+  // --- Listen for Messages (and Highlighting Logic) ---
   const messagesRef = ref(db, "global-chat");
   onValue(messagesRef, snapshot => {
     chatContainer.innerHTML = "";
@@ -147,8 +182,33 @@
     const messagesArray = Object.entries(data).sort((a, b) => a[1].timestamp - b[1].timestamp);
 
     messagesArray.forEach(([id, msg]) => {
+      // Safety checks
+      if (!msg || !msg.text || !msg.author) {
+          console.warn("Skipping incomplete chat message:", msg);
+          return; 
+      }
+
       const div = document.createElement("div");
       div.classList.add("forum-thread");
+
+      // Check for mention: Uses lower-case comparison for reliability
+      if (currentDisplayName) {
+        // Standardized, lowercased name and mention string
+        const currentNameLower = currentDisplayName.toLowerCase();
+        const mentionStringLower = `@${currentNameLower}`;
+        const messageTextLower = msg.text.toLowerCase();
+        
+        // 1. Check if the message is NOT from the current user (case-insensitive)
+        const isNotSelf = msg.author.toLowerCase() !== currentNameLower;
+        
+        // 2. Check for a case-insensitive mention
+        const isMentioned = messageTextLower.includes(mentionStringLower);
+
+        if (isNotSelf && isMentioned) {
+          div.classList.add("mention-highlight");
+        }
+      }
+
       div.innerHTML = `<strong>${msg.author}:</strong> ${msg.text}`;
       chatContainer.appendChild(div);
     });
@@ -157,14 +217,13 @@
     chatContainer.scrollTop = chatContainer.scrollHeight;
   });
 
-  // Function to send a message to Discord with the user's avatar
+  // --- Discord Webhook Function ---
   async function sendToDiscord(username, message, avatarUrl) {
     const payload = {
       username: username,
       content: message
     };
     
-    // Conditionally add the avatar_url if one is provided
     if (avatarUrl) {
       payload.avatar_url = avatarUrl;
     }
@@ -185,26 +244,26 @@
     }
   }
 
-  // Send message to Firebase and Discord
+  // --- Send Message Handler ---
   sendBtn.addEventListener("click", () => {
-    if (!currentUserData) return; // Prevent sending if not authenticated
+    if (!currentDisplayName) return; // Must be authenticated
 
     const text = messageInput.value.trim();
     if (!text) return;
 
-    // Get the display name and photo URL using the getPfpUrl function
-    const displayName = currentUserData.displayName;
+    const displayName = currentDisplayName; // Use the confirmed display name
     const photoUrl = getPfpUrl(displayName);
 
-    // Send to Firebase (your existing code)
+    // Send to Firebase 
     const newMsgRef = push(ref(db, "global-chat"));
     set(newMsgRef, {
       author: displayName,
       text,
-      timestamp: serverTimestamp()
+      // Use Firebase server timestamp for accurate sorting
+      timestamp: serverTimestamp() 
     });
 
-    // Send to Discord with the user's display name and photo URL
+    // Send to Discord
     sendToDiscord(displayName, text, photoUrl);
 
     // Clear message input
@@ -213,10 +272,13 @@
 
   // Allow Enter key to send
   messageInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") sendBtn.click();
+    if (e.key === "Enter" && !messageInput.disabled) {
+        e.preventDefault(); // Prevent accidental form submission
+        sendBtn.click();
+    }
   });
 
-  // Page transition scripts
+  // --- Page Transition Scripts ---
   document.body.classList.add('fade-enter');
   setTimeout(() => {
     document.body.classList.add('fade-enter-active');
@@ -233,6 +295,9 @@
       }
     });
   });
+
+
 </script>
 </body>
 </html>
+
