@@ -180,7 +180,7 @@ header .subtitle {
 }
 
 /* --- Warning & Info Boxes --- */
-.warning, .updates {
+.warning, .updates, .app {
     background: rgba(0, 0, 0, 0.5);
     border: 2px solid #01edf0;
     box-shadow: 0 0 10px rgba(1, 237, 240, 0.5), inset 0 0 5px rgba(1, 237, 240, 0.5);
@@ -189,7 +189,7 @@ header .subtitle {
     width: 100%;
 }
 
-.warning1 {
+.warning1, .app1 {
     font-size: 1.2rem;
     text-shadow: 0 0 5px #01edf0;
 }
