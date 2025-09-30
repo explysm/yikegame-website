@@ -10,4 +10,4 @@ Please report all bugs & issues in [here](https://github.com/explysm/yikegame-we
 
 There is now an app for this! You can download it for [Windows & Linux](https://github.com/explysm/yikegames/releases)!
 
-The app has a bit more features, but not by a lot. Includes a way better game browser than the one on games.yike.games (the website will soon get removed & fully replaced by the desktop version)
+The app has a bit more features, but not by a lot. Includes a way better game browser than the one on games.yike.games,  and a revamped chat page with better mention highlighting, and even an online user list! Also, better UI (the games website will soon get removed & fully replaced by the desktop version)
