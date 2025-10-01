@@ -688,7 +688,7 @@
 
   // Discord webhook (unchanged)
   async function sendToDiscord(username, message, avatarUrl) {
-    message = message + " - (***This was sent from the desktop client.***)"
+    message = message + " - (***This was sent from the web client.***)"
     const payload = {
       username: username,
       content: message
