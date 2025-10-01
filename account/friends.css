@@ -1,0 +1,30 @@
+/* Friends List Styles */
+#friends-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.friend-card {
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.friend-card img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+}
+
+.friend-card h4 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.friend-card .btn {
+    margin-top: 15px;
+}

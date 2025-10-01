@@ -1,0 +1,140 @@
+/* --- Account Page Layout --- */
+.account-container {
+    display: flex;
+    gap: 40px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 50px auto;
+}
+
+.sidebar {
+    width: 300px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid #01edf0;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(1, 237, 240, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main-content {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid #01edf0;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(1, 237, 240, 0.5);
+}
+
+/* --- User Card --- */
+.user-card {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.user-card .pfp-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #01edf0;
+    margin-bottom: 15px;
+}
+
+.user-card h2 {
+    font-size: 1.8rem;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.user-card p {
+    font-size: 1rem;
+    color: #01edf0;
+    opacity: 0.8;
+    margin-bottom: 20px;
+}
+
+/* --- Account Nav --- */
+.account-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.account-nav .nav-item {
+    background-color: transparent;
+    border: 2px solid transparent;
+    color: #01edf0;
+    padding: 10px 15px;
+    font-size: 1.1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.account-nav .nav-item:hover {
+    background-color: rgba(1, 237, 240, 0.1);
+    border-left-color: #01edf0;
+}
+
+.account-nav .nav-item.active {
+    background-color: rgba(1, 237, 240, 0.2);
+    border-left: 4px solid #01edf0;
+    font-weight: bold;
+}
+
+/* --- Tab Content --- */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    text-decoration: underline;
+    text-underline-offset: 5px;
+}
+
+/* --- Form Groups --- */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* --- Logout Button --- */
+.logout-btn-container {
+    margin-top: auto; /* Pushes the logout button to the bottom */
+}
+
+/* Back Arrow */
+.back-arrow {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: #01edf0;
+    text-decoration: none;
+    font-size: 24px;
+}
+
+/* Modal Fixes */
+.modal.hidden {
+    display: none;
+}
+
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+    <a href="../index.html" class="back-arrow">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    </a>
+
+    <main class="profile-container">
+        <div class="profile-header">
+            <img id="pfp-display" 
+                 src="https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png" 
+                 alt="Profile Picture" 
+                 class="pfp-image"
+                 onerror="this.src='https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png'">
+            <h1 id="user-display-name">Loading...</h1>
+            <div id="friend-status-container"></div>
+            <p id="user-join-date">Loading...</p>
+            <p id="profile-views">Loading...</p>
+        </div>
+        <div class="profile-body">
+            <section class="profile-section">
+                <h2>About Me</h2>
+                <p id="user-bio">Loading...</p>
+            </section>
+            <section class="profile-section">
+                <h2>Social Links</h2>
+                <div id="user-socials" class="social-links-container">Loading...</div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
+            authDomain: "yikegames-website.firebaseapp.com",
+            projectId: "yikegames-website",
+            databaseURL: "https://yikegames-website-default-rtdb.firebaseio.com/",
+            storageBucket: "yikegames-website.firebasestorage.app",
+            messagingSenderId: "1086586566551",
+            appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
+            measurementId: "G-FXH0D07D86"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            loadUserProfile();
+        });
+
+        async function loadUserProfile() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('uid');
+
+            const displayNameEl = document.getElementById('user-display-name');
+            const pfpEl = document.getElementById('pfp-display');
+            const bioEl = document.getElementById('user-bio');
+            const socialsEl = document.getElementById('user-socials');
+            const joinDateEl = document.getElementById('user-join-date');
+            const friendStatusContainer = document.getElementById('friend-status-container');
+
+            if (!userId) {
+                displayNameEl.textContent = 'User not found';
+                return;
+            }
+
+            try {
+                const userRef = ref(db, `users/${userId}`);
+                const snapshot = await get(userRef);
+
+                if (!snapshot.exists()) {
+                    displayNameEl.textContent = 'User not found';
+                    return;
+                }
+
+                const data = snapshot.val();
+
+                displayNameEl.textContent = data.displayName || 'Unnamed User';
+                pfpEl.src = data.photoURL || 'https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png';
+                bioEl.textContent = data.profile?.description || 'No bio yet.';
+                joinDateEl.textContent = `Joined ${new Date(data.creationTime).toLocaleDateString()}`;
+
+                if (data.profile?.profileColor) {
+                    document.body.style.setProperty('--profile-color', data.profile.profileColor);
+                }
+                if (data.profile?.accentColor) {
+                    document.body.style.setProperty('--accent-color', data.profile.accentColor);
+                }
+                if (data.profile?.buttonHoverColor) {
+                    document.body.style.setProperty('--button-hover-color', data.profile.buttonHoverColor);
+                }
+                if (data.profile?.profileBackgroundColor) {
+                    document.body.style.setProperty('--profile-background-color', data.profile.profileBackgroundColor);
+                }
+
+                const profileViewsRef = ref(db, `users/${userId}/profile/profileViews`);
+                const currentViews = (await get(profileViewsRef)).val() || 0;
+                await set(profileViewsRef, currentViews + 1);
+                document.getElementById('profile-views').textContent = `Profile Views: ${currentViews + 1}`;
+
+                socialsEl.innerHTML = '';
+                if (data.profile?.socials && Object.keys(data.profile.socials).length > 0) {
+                    for (const [platform, handle] of Object.entries(data.profile.socials)) {
+                        if (!handle) continue;
+                        const link = document.createElement('a');
+                        link.href = `https://${platform}.com/${handle}`;
+                        link.textContent = platform.charAt(0).toUpperCase() + platform.slice(1);
+                        link.target = '_blank';
+                        link.rel = 'noopener noreferrer';
+                        socialsEl.appendChild(link);
+                    }
+                } else {
+                    socialsEl.textContent = 'No social links added yet.';
+                }
+
+                // Friend status logic
+                friendStatusContainer.innerHTML = '';
+                if (currentUser && currentUser.uid !== userId) {
+                    const currentUserRef = ref(db, `users/${currentUser.uid}`);
+                    const currentUserSnapshot = await get(currentUserRef);
+                    const currentUserData = currentUserSnapshot.val();
+
+                    if (currentUserData.friends && currentUserData.friends[userId]) {
+                        friendStatusContainer.innerHTML = '<p>Friends</p>';
+                    } else if (data.profile?.friendRequests && data.profile.friendRequests[currentUser.uid]) {
+                        friendStatusContainer.innerHTML = '<p>Friend Request Sent</p>';
+                    } else if (currentUserData.profile?.friendRequests && currentUserData.profile.friendRequests[userId]) {
+                        friendStatusContainer.innerHTML = '<button id="accept-friend-btn" class="btn">Accept Friend Request</button>';
+                        document.getElementById('accept-friend-btn').addEventListener('click', () => acceptFriendRequest(userId));
+                    } else {
+                        friendStatusContainer.innerHTML = '<button id="add-friend-btn" class="btn">Add Friend</button>';
+                        document.getElementById('add-friend-btn').addEventListener('click', () => addFriend(userId));
+                    }
+                }
+
+            } catch (error) {
+                console.error("Failed to load user profile:", error);
+            }
+        }
+
+        async function addFriend(profileUserId) {
+            if (!currentUser) return alert('You must be logged in to add friends.');
+
+            const friendRequestRef = ref(db, `users/${profileUserId}/profile/friendRequests/${currentUser.uid}`);
+            await set(friendRequestRef, true);
+            loadUserProfile(); // Refresh the profile to show the updated status
+        }
+
+        async function acceptFriendRequest(profileUserId) {
+            if (!currentUser) return alert('You must be logged in to accept friend requests.');
+
+            // Remove friend request from both users
+            const currentUserFriendRequestRef = ref(db, `users/${currentUser.uid}/profile/friendRequests/${profileUserId}`);
+            const profileUserFriendRequestRef = ref(db, `users/${profileUserId}/profile/friendRequests/${currentUser.uid}`);
+            await remove(currentUserFriendRequestRef);
+            await remove(profileUserFriendRequestRef);
+
+            // Add to friends list for both users
+            const currentUserFriendRef = ref(db, `users/${currentUser.uid}/friends/${profileUserId}`);
+            const profileUserFriendRef = ref(db, `users/${profileUserId}/friends/${currentUser.uid}`);
+            await set(currentUserFriendRef, true);
+            await set(profileUserFriendRef, true);
+
+            loadUserProfile(); // Refresh the profile to show the updated status
+        }
+
+        window.addEventListener('DOMContentLoaded', loadUserProfile);
+    </script>
+</body>
+</html>

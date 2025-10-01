@@ -1,10 +1,15 @@
-/* --- Retro Futurism Vibe --- */
-
+/* --- Retro Futurism Vibe (Original CSS) --- */
+  .fade-enter { opacity: 0; }
+  .fade-enter-active { opacity: 1; transition: opacity 0.5s ease; }
+  .fade-exit-active { opacity: 0; transition: opacity 0.5s ease; }
 /* Basic Reset & Font */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    /* Global scrollbar styling for Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(1, 237, 240, 0.4) transparent;
 }
 
 /* Base Body Styles */
@@ -106,6 +111,22 @@ header .subtitle {
     opacity: 0.7;
 }
 
+/*
+ * NEW FIX: Ensures any bare <a> tags in the header/navigation 
+ * get basic neon styling and lose the default underline.
+ */
+header a, .navigation a {
+    color: #01edf0;
+    text-decoration: none;
+    text-shadow: 0 0 5px #01edf0;
+    transition: color 0.2s ease;
+}
+
+header a:hover, .navigation a:hover {
+    color: #fff;
+    text-shadow: 0 0 15px #01edf0;
+}
+
 /* --- Main Layout --- */
 .main-content {
     display: flex;
@@ -136,14 +157,39 @@ header .subtitle {
 }
 
 /* --- Buttons --- */
-.buttons-center {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+.main-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
+    width: 100%;
+    max-width: 800px;
     margin-bottom: 50px;
 }
 
+.nav-btn {
+    background-color: rgba(1, 237, 240, 0.1);
+    border: 2px solid #01edf0;
+    color: #01edf0;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    text-shadow: 0 0 5px #01edf0;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(1, 237, 240, 0.5);
+    border-radius: 5px;
+    text-decoration: none;
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.nav-btn:hover {
+    background-color: rgba(1, 237, 240, 0.3);
+    box-shadow: 0 0 25px #01edf0;
+    transform: scale(1.05);
+}
+
+/* The primary button style, used for links or buttons */
 .btn {
     background-color: transparent;
     border: 2px solid #01edf0;
@@ -155,6 +201,8 @@ header .subtitle {
     transition: all 0.3s ease;
     box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
     border-radius: 0;
+    text-decoration: none; /* Crucial for links that use this class */
+    display: inline-block; /* Crucial for links to inherit block properties */
 }
 
 .btn:hover {
@@ -162,6 +210,8 @@ header .subtitle {
     box-shadow: 0 0 20px #01edf0;
     transform: scale(1.05);
 }
+
+/* NEW: Specialized button style for Navigation links that need the full button look */
 
 /* Specific buttons, keeping the neon theme */
 .login-btn, #send-btn {
@@ -171,6 +221,8 @@ header .subtitle {
     font-size: 1.3rem;
     padding: 10px 25px;
     transition: all 0.3s ease;
+    text-decoration: none; /* Make sure these links lose underline too */
+    display: inline-block;
 }
 
 .login-btn:hover, #send-btn:hover {
@@ -180,7 +232,7 @@ header .subtitle {
 }
 
 /* --- Warning & Info Boxes --- */
-.warning, .updates, .app {
+.warning, .updates {
     background: rgba(0, 0, 0, 0.5);
     border: 2px solid #01edf0;
     box-shadow: 0 0 10px rgba(1, 237, 240, 0.5), inset 0 0 5px rgba(1, 237, 240, 0.5);
@@ -189,7 +241,7 @@ header .subtitle {
     width: 100%;
 }
 
-.warning1, .app1 {
+.warning1 {
     font-size: 1.2rem;
     text-shadow: 0 0 5px #01edf0;
 }
@@ -294,7 +346,25 @@ header .subtitle {
 }
 
 
-/* --- Global Chat --- */
+/* --- Notifications --- */
+#notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.notification {
+    background-color: #333;
+    color: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+
+/* --- Social --- */
 body.chat-page, body.forums-page {
     background-image:
         linear-gradient(rgba(1, 237, 240, 0.05) 1px, transparent 1px),
@@ -304,50 +374,9 @@ body.chat-page, body.forums-page {
     background-size: 2px 2px, 2px 2px, 100% 4px, 4px 100%;
 }
 
-#chat-container {
-    max-width: 800px;
-    width: 100%;
-    height: 400px;
-    overflow-y: auto;
-    background: rgba(0, 0, 0, 0.5);
-    border: 2px solid #01edf0;
-    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5), inset 0 0 5px rgba(1, 237, 240, 0.5);
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin: 20px auto;
-}
-
-#chat-container .forum-thread {
-    background: #0d283c;
-    border: 1px solid #01edf0;
-    padding: 12px 15px;
-    text-align: left;
-    max-width: 100%;
-    font-size: 1rem;
-    box-shadow: 0 0 5px rgba(1, 237, 240, 0.5);
-}
 
 /* --- Scrollbar --- */
-#chat-container::-webkit-scrollbar {
-    width: 12px;
-}
-#chat-container::-webkit-scrollbar-track {
-    background: #0a141f;
-}
-#chat-container::-webkit-scrollbar-thumb {
-    background: #01edf0;
-    border: 2px solid #0a141f;
-}
-#chat-container::-webkit-scrollbar-thumb:hover {
-    background: #47f7f9;
-}
-/* Firefox scrollbar */
-#chat-container {
-    scrollbar-width: thin;
-    scrollbar-color: #01edf0 #0a141f;
-}
+/* Scrollbar styles are now handled globally */
 
 /* --- Retro Input Fields --- */
 .input-field, #message-input {
@@ -407,18 +436,7 @@ body.chat-page, body.forums-page {
 }
 
 /* Specific button styling on the main page, ensuring consistency */
-.btn {
-    background-color: transparent;
-    border: 2px solid #01edf0;
-    color: #01edf0;
-    padding: 12px 30px;
-    font-size: 1.5rem;
-    cursor: pointer;
-    text-shadow: 0 0 5px #01edf0;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
-    border-radius: 0;
-}
+/* NOTE: The .btn class is already defined above and includes text-decoration: none and display: inline-block */
 
 /* --- Mobile-first Layout adjustments --- */
 @media (max-width: 768px) {
@@ -450,6 +468,81 @@ body.chat-page, body.forums-page {
     .new-post-form textarea {
         width: 100%;
         min-width: 100%;
+    }
+
+    /* Account Page (account.html) */
+    .account-container {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .sidebar {
+        width: 100%;
+        min-width: unset;
+        margin-bottom: 20px;
+    }
+
+    .user-card {
+        padding: 15px;
+    }
+
+    .user-card h2 {
+        font-size: 1.5rem;
+    }
+
+    .user-card p {
+        font-size: 0.9rem;
+    }
+
+    .account-nav {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .account-nav .nav-item {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+    }
+
+    .logout-btn-container {
+        width: 100%;
+        padding: 0 15px;
+    }
+
+    .logout-btn-container .btn {
+        width: 100%;
+        font-size: 1.2rem;
+        padding: 10px;
+    }
+
+    .main-content {
+        width: 100%;
+        min-width: unset;
+        padding: 10px;
+    }
+
+    .tab-content h3 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+
+    .form-group {
+        width: 100%;
+    }
+
+    .form-group label {
+        font-size: 0.95rem;
+    }
+
+    .input-field {
+        font-size: 1rem;
+        padding: 8px;
+    }
+
+    .username-btn, .pfp-btn {
+        font-size: 1.1rem;
+        padding: 8px 15px;
     }
 }
 
@@ -722,4 +815,559 @@ body.chat-page, body.forums-page {
     background-color: rgba(1, 237, 240, 0.2);
     box-shadow: 0 0 20px #01edf0;
     transform: scale(1.05);
+}
+
+/* ========================================================= */
+/* --- NEW GALLERY PAGE STYLES (Game Card, Modal, Buttons) --- */
+/* ========================================================= */
+
+/* Game Grid Container */
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    width: 100%;
+    margin-top: 20px;
+    padding: 0 20px;
+}
+
+/* Loading/Spinner message */
+.loading-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    font-size: 1.5rem;
+}
+
+/* Spinner (Basic CSS only) */
+.spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(1, 237, 240, 0.3);
+    border-radius: 50%;
+    border-top-color: #01edf0;
+    animation: spin 1s ease-in-out infinite;
+    margin: 10px auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ... (rest of CSS remains the same above this section) ... */
+
+/* Game Card Styling */
+.game-card {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #01edf0;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 25px #01edf0;
+}
+
+/* 1. Outer Container: Establishes relative position and aspect ratio */
+.game-card-image-container {
+    position: relative;
+    width: 100%;
+    /* 16:9 aspect ratio for covers */
+    padding-bottom: 56.25%; 
+    overflow: hidden;
+    z-index: 1; 
+}
+
+/* 🔥 2. New Element: The Blurred Background Layer (Absolute Positioned) */
+.game-card-image-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* Apply the blur and slight zoom here only */
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px);
+    transform: scale(1.02); /* Slight zoom to hide blur edges */
+    opacity: 0.8;
+    z-index: 1; 
+    transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+/* 🔥 3. The Foreground Image Layer (Absolute Positioned, Crisp) */
+.game-card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* CRITICAL: Use 'contain' to ensure the main image is NOT zoomed/cropped */
+    object-fit: contain;
+    
+    /* Ensure it is on top of the blurred background */
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.4); /* Fills empty space if image is transparent */
+    
+    display: block;
+    transition: opacity 0.3s ease;
+    
+    /* Ensure no residual filters/transforms from the parent */
+    filter: none; 
+    transform: none; 
+}
+
+/* --- Updated Game Card Content Styles --- */
+
+.game-card-content {
+    padding: 15px;
+    text-align: left;
+}
+
+/* Updated Title Style */
+.game-card-title {
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+    color: #fff; /* White for high contrast */
+    text-shadow: 0 0 8px #01edf0; /* Stronger neon glow */
+    letter-spacing: 1px;
+}
+
+/* Updated Description Style */
+.game-card-description {
+    font-size: 1rem;
+    color: #01edf0; /* Neon color for body text */
+    margin-bottom: 10px;
+    opacity: 0.9; /* Slightly more opaque for better readability */
+    line-height: 1.4;
+    
+    /* Truncate description (Keep this for clean card layout) */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.game-card-author {
+    font-size: 0.9rem;
+    color: #fff;
+    opacity: 0.7; /* Subtle white text */
+    display: block;
+    margin-bottom: 15px;
+}
+
+/* 🔥 The Download Button FIX 🔥 */
+.game-card-link {
+    display: block;
+    text-align: center;
+    
+    /* Neon button style */
+    background-color: transparent; /* Make it transparent */
+    color: #01edf0; /* Neon text */
+    border: 2px solid #01edf0; /* Neon border */
+    text-decoration: none;
+    padding: 10px 15px;
+    font-weight: bold;
+    border-radius: 0; /* Sharp corners */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5); /* Initial glow */
+}
+
+.game-card-link:hover {
+    background-color: rgba(1, 237, 240, 0.2); /* Slight fill on hover */
+    box-shadow: 0 0 20px #01edf0; /* Enhanced glow on hover */
+    transform: translateY(-2px); /* Slight lift */
+}
+
+/* ... (Rest of CSS) ... */
+
+/* ... (rest of CSS remains the same below this section) ... */
+/* --- Developer Overlay (Edit/Delete Buttons) --- */
+.developer-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 3; /* Above the image and background */
+}
+
+.game-card:hover .developer-overlay {
+    opacity: 1;
+}
+
+/* Edit and Delete Buttons (Highly Specific Styling) */
+.developer-overlay .delete-btn,
+.developer-overlay .edit-btn {
+    background-color: rgba(255, 0, 127, 0.1); /* Pink/Red hue for danger/action */
+    border: 2px solid #ff007f;
+    color: #ff007f;
+    padding: 8px 15px;
+    margin: 0 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    text-shadow: 0 0 5px #ff007f;
+    box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+    transition: all 0.3s ease;
+    border-radius: 0;
+}
+
+.developer-overlay .edit-btn {
+    background-color: rgba(1, 237, 240, 0.1);
+    border: 2px solid #01edf0;
+    color: #01edf0;
+    text-shadow: 0 0 5px #01edf0;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
+}
+
+.developer-overlay .delete-btn:hover {
+    background-color: rgba(255, 0, 127, 0.5);
+    box-shadow: 0 0 20px #ff007f;
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.developer-overlay .edit-btn:hover {
+    background-color: rgba(1, 237, 240, 0.5);
+    box-shadow: 0 0 20px #01edf0;
+    color: #0b1a2a;
+    transform: scale(1.1);
+}
+
+
+/* --- Modal Styling --- */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal.hidden {
+    display: none;
+    opacity: 0;
+}
+
+.modal-content {
+    background: #0d283c;
+    border: 3px solid #01edf0;
+    box-shadow: 0 0 20px #01edf0;
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    border-radius: 0;
+    animation: modal-fade-in 0.5s ease;
+}
+
+@keyframes modal-fade-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    font-size: 2rem;
+    text-shadow: 0 0 10px #01edf0;
+}
+
+.close-modal-btn {
+    background: transparent;
+    border: none;
+    color: #ff007f;
+    font-size: 2rem;
+    cursor: pointer;
+    text-shadow: 0 0 5px #ff007f;
+    transition: transform 0.2s ease;
+}
+
+.close-modal-btn:hover {
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+/* Modal Form Styles */
+.form-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-field-group input[type="file"] {
+    border: 2px solid #01edf0;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #01edf0;
+    font-size: 1rem;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
+    cursor: pointer;
+}
+
+/* Submit Button in Modal */
+.submit-button {
+    background-color: transparent;
+    border: 2px solid #01edf0;
+    color: #01edf0;
+    padding: 12px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    text-shadow: 0 0 5px #01edf0;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
+    border-radius: 0;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.submit-button:hover:not(:disabled) {
+    background-color: rgba(1, 237, 240, 0.2);
+    box-shadow: 0 0 20px #01edf0;
+}
+
+.submit-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: rgba(0, 0, 0, 0.5);
+    box-shadow: none;
+}
+
+/* Upload Status Message */
+.upload-status {
+    font-size: 0.9rem;
+    color: #ff007f;
+    text-shadow: 0 0 5px #ff007f;
+    text-align: center;
+    margin-top: 5px;
+}
+
+/* Notification Styling */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notification {
+    padding: 15px 25px;
+    border: 2px solid;
+    box-shadow: 0 0 15px;
+    font-size: 1rem;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+    border-radius: 0;
+    min-width: 250px;
+}
+
+.notification.success {
+    background-color: rgba(1, 237, 240, 0.2);
+    border-color: #01edf0;
+    color: #01edf0;
+    box-shadow: 0 0 15px #01edf0;
+}
+
+.notification.error {
+    background-color: rgba(255, 0, 127, 0.2);
+    border-color: #ff007f;
+    color: #ff007f;
+    box-shadow: 0 0 15px #ff007f;
+}
+
+/* Utility Class */
+.hidden {
+    display: none !important;
+}
+
+/* Mobile adjustments for the gallery grid */
+@media (max-width: 768px) {
+    .games-grid {
+        grid-template-columns: 1fr;
+        padding: 0 10px;
+    }
+    .modal-content {
+        padding: 20px;
+    }
+}
+
+
+/* --- Global Scrollbar Styles (Webkit) --- */
+/* Applies to all scrollable elements for a native, unobtrusive look */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(1, 237, 240, 0.4);
+    border-radius: 0;
+    border: 1px solid rgba(1, 237, 240, 0.6);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(71, 247, 249, 0.7);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* --- Profile Page Styles --- */
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-body {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.profile-section {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #01edf0;
+    padding: 20px;
+    width: 100%;
+}
+
+.profile-section h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-decoration: underline;
+}
+
+.social-links-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.social-links-container a {
+    color: #01edf0;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: color 0.2s ease;
+}
+
+.social-links-container a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+/* --- Edit Profile Page Styles --- */
+.edit-profile-container {
+    width: 100%;
+    max-width: 600px;
+}
+
+.edit-profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.edit-profile-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-align: left;
+}
+
+.edit-profile-container label {
+    display: block;
+    margin-bottom: 5px;
+    text-align: left;
+    font-weight: bold;
+}
+
+/* --- Mobile Responsiveness for Profile Pages --- */
+@media (max-width: 768px) {
+    .profile-container, .edit-profile-container {
+        padding: 10px;
+    }
+}
+
+/* --- Search Icon and Modal Styles --- */
+.search-icon-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1001;
+    cursor: pointer;
+    background-color: rgba(13, 40, 60, 0.8);
+    padding: 10px;
+    border-radius: 50%;
+    border: 2px solid #01edf0;
+    box-shadow: 0 0 15px rgba(1, 237, 240, 0.5);
+    transition: all 0.3s ease;
+}
+
+.search-icon-btn:hover {
+    background-color: rgba(1, 237, 240, 0.2);
+    transform: scale(1.1);
+}
+
+.search-icon-btn svg {
+    stroke: #01edf0;
+}
+
+#search-modal .modal-content {
+    max-width: 500px;
+}
+
+#search-status {
+    margin-top: 15px;
+    font-size: 1rem;
+    color: #ff007f;
 }

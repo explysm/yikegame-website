@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Friends</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="account.css">
+    <link rel="stylesheet" href="friends.css">
+</head>
+<body>
+    <a href="../index.html" class="back-arrow">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    </a>
+    <div class="account-container">
+        <main class="main-content">
+            <h3>My Friends</h3>
+            <div id="friends-list-container"></div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
+            authDomain: "yikegames-website.firebaseapp.com",
+            projectId: "yikegames-website",
+            databaseURL: "https://yikegames-website-default-rtdb.firebaseio.com/",
+            storageBucket: "yikegames-website.firebasestorage.app",
+            messagingSenderId: "1086586566551",
+            appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
+            measurementId: "G-FXH0D07D86"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loadFriends(user.uid);
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        async function loadFriends(userId) {
+            const friendsListContainer = document.getElementById('friends-list-container');
+            const friendsRef = ref(db, `users/${userId}/friends`);
+            const snapshot = await get(friendsRef);
+
+            if (snapshot.exists()) {
+                const friends = snapshot.val();
+                const friendUids = Object.keys(friends);
+                let friendsHtml = '';
+
+                for (const friendUid of friendUids) {
+                    const userRef = ref(db, `users/${friendUid}`);
+                    const userSnapshot = await get(userRef);
+                    if (userSnapshot.exists()) {
+                        const userData = userSnapshot.val();
+                        friendsHtml += `
+                            <div class="friend-card">
+                                <img src="${userData.photoURL || 'https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png'}" alt="${userData.displayName}'s Profile Picture">
+                                <h4>${userData.displayName}</h4>
+                                <a href="profile.html?uid=${friendUid}" class="btn">View Profile</a>
+                            </div>
+                        `;
+                    }
+                }
+
+                friendsListContainer.innerHTML = friendsHtml;
+            } else {
+                friendsListContainer.innerHTML = '<p>You have no friends yet.</p>';
+            }
+        }
+    </script>
+</body>
+</html>

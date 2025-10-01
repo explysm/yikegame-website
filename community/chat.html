@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en" class="forums-page">
+<head>
+<meta charset="UTF-8">
+<title>Social</title>
+<link rel="stylesheet" href="../styles/style.css">
+<meta http-equiv="Content-Security-Policy" content="
+    default-src * 'unsafe-inline' 'unsafe-eval'; 
+    connect-src *;
+    script-src * 'unsafe-inline' 'unsafe-eval';
+">
+
+<style>
+  /* ---------------------------------------------------------------------- */
+  /* --- STYLESHEET START (Custom Font and Button Styling REMOVED) --- */
+  /* ---------------------------------------------------------------------- */
+  
+  /* Reset and Base Styles */
+  :root {
+      --primary-color: #01edf0;
+      --secondary-color: #0d283c;
+      --accent-color: #00ff00;
+  }
+  
+  body {
+     font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Liberation Mono", "Roboto Mono", monospace;
+    background-color: #0b1a2a;
+    color: #f0f8ff;
+    /* Custom font removed, will inherit browser default */
+  }
+  
+  /* .btn styles removed */
+  
+  /* Page Transition Styles */
+  .fade-enter { opacity: 0; }
+  .fade-enter-active { opacity: 1; transition: opacity 0.5s ease; }
+  .fade-exit-active { opacity: 0; transition: opacity 0.5s ease; }
+
+
+  /* --- Global & Container Styles (Optimized for Desktop) --- */
+  html, body {
+      height: 100%; 
+      margin: 0;
+      padding: 0;
+  }
+
+  .chat-wrapper {
+    display: flex;
+    max-width: 1400px; 
+    width: 90%; 
+    height: 90vh; 
+    margin: 20px auto;
+    gap: 0;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 20px rgba(1, 237, 240, 0.5);
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  /* --- Sidebar Styles (Always Visible) --- */
+  .users-sidebar {
+    width: 240px;
+    min-width: 240px; 
+    background: rgba(11, 26, 42, 0.95);
+    border-right: 2px solid var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    overflow-y: hidden;
+  }
+
+  .users-sidebar h3 {
+    padding: 15px;
+    margin: 0;
+    border-bottom: 2px solid var(--primary-color);
+    text-align: center;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px var(--primary-color);
+    font-size: 1.1rem;
+    flex-shrink: 0; 
+  }
+
+  .user-list {
+    flex: 1; 
+    overflow-y: auto;
+    padding: 10px;
+    text-align: left; 
+  }
+  
+  /* User Item details */
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 5px; border-radius: 4px; transition: background 0.2s; cursor: pointer; }
+  .user-item:hover { background: rgba(1, 237, 240, 0.1); }
+  .user-avatar-wrapper { position: relative; width: 32px; height: 32px; }
+  .user-avatar-small { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--primary-color); object-fit: cover; }
+  .user-name { flex: 1; color: var(--primary-color); font-size: 0.9rem; }
+  .status-indicator { width: 10px; height: 10px; border-radius: 50%; background: #666; border: 2px solid #0b1a2a; position: absolute; bottom: 0; right: 0; }
+  .status-indicator.online { background: var(--accent-color); box-shadow: 0 0 5px var(--accent-color); }
+
+  /* --- Main Chat Area --- */
+  .chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(13, 40, 60, 0.95);
+    min-width: 0; 
+  }
+
+  .chat-header {
+    padding: 15px 20px;
+    border-bottom: 2px solid var(--primary-color);
+    background: rgba(11, 26, 42, 0.8);
+    text-align: left; 
+    flex-shrink: 0;
+  }
+
+  .chat-header h2 {
+    margin: 0;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px var(--primary-color);
+    font-size: 1.3rem;
+  }
+
+  #chat-container {
+    flex: 1; 
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: transparent;
+    text-align: left; 
+    min-height: 0; 
+  }
+
+  /* --- Message Styling --- */
+  .message { 
+    display: flex; 
+    gap: 12px; 
+    padding: 8px 12px; 
+    border-radius: 4px; 
+    transition: background 0.2s; 
+    word-wrap: break-word; 
+    text-align: left; 
+    position: relative; 
+  }
+
+  .message:hover { 
+    background: rgba(1, 237, 240, 0.05); 
+  }
+  
+  .message-avatar { 
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    border: 2px solid var(--primary-color); 
+    object-fit: cover; 
+    flex-shrink: 0; 
+    box-shadow: 0 0 5px rgba(1, 237, 240, 0.5); 
+  }
+  .message-content { flex: 1; min-width: 0; }
+  
+  .message-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+  
+  .message-author { 
+      color: var(--primary-color); 
+      font-weight: bold; 
+      font-size: 1rem; 
+      text-shadow: 0 0 5px rgba(1, 237, 240, 0.5); 
+  }
+
+  .message-timestamp { color: rgba(1, 237, 240, 0.5); font-size: 0.75rem; }
+  .message-text { color: #fff; line-height: 1.5; font-size: 0.95rem; }
+  .message.mention-highlight { 
+    background: linear-gradient(90deg, rgba(0, 255, 0, 0.15) 0%, rgba(0, 255, 0, 0.05) 100%); 
+    border-left: 4px solid var(--accent-color); 
+    padding-left: 12px; 
+    margin-left: -4px; 
+  }
+  .mention-tag { 
+    color: var(--accent-color); 
+    font-weight: bold; 
+    background: rgba(0, 255, 0, 0.2); 
+    padding: 2px 4px; 
+    border-radius: 3px; 
+  }
+
+  /* --- Reply Button Style --- */
+  .reply-button {
+    position: absolute;
+    top: -15px; 
+    right: 15px;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    background: rgba(1, 237, 240, 0.1);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    border-radius: 3px;
+    transform: translateY(5px);
+    z-index: 10;
+  }
+
+  .message:hover .reply-button {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reply-button:hover {
+    background: rgba(1, 237, 240, 0.3);
+  }
+  
+
+  /* --- Chat Input Area --- */
+  .chat-input-wrapper { padding: 20px; border-top: 2px solid var(--primary-color); background: rgba(11, 26, 42, 0.8); flex-shrink: 0; }
+  .typing-indicator { min-height: 20px; padding: 0 5px 5px 5px; color: rgba(1, 237, 240, 0.7); font-size: 0.85rem; font-style: italic; text-align: left; }
+  .chat-controls { display: flex; gap: 10px; margin: 0; }
+  #message-input { 
+    flex: 1; 
+    background: rgba(0, 0, 0, 0.5); 
+    border: 2px solid var(--primary-color); 
+    color: var(--primary-color); 
+    padding: 12px 15px; 
+    font-size: 1rem; 
+    font-family: inherit; 
+    border-radius: 4px; 
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.3); 
+  }
+  #message-input:focus { box-shadow: 0 0 15px rgba(1, 237, 240, 0.5); outline: none; }
+  
+  /* #send-btn styles removed */
+  
+  .char-count { font-size: 0.8rem; color: rgba(1, 237, 240, 0.6); text-align: right; margin-top: 5px; }
+
+  /* --- Utility Styles --- */
+  .hidden-title { display: none; }
+  .back-link { margin: 20px auto; max-width: 1400px; width: 90%; text-align: left; }
+
+  /* ---------------------------------------------------------------------- */
+  /* --- STYLESHEET END --- */
+  /* ---------------------------------------------------------------------- */
+</style>
+</head>
+<body class="forums-page">
+<h1 class="hidden-title">Social</h1> 
+
+<div class="chat-wrapper">
+  <div class="users-sidebar">
+    <h3>ONLINE USERS</h3>
+    <div class="user-list" id="user-list">
+      <p style="text-align: center; color: rgba(1, 237, 240, 0.5); padding: 20px;">Loading users...</p>
+    </div>
+  </div>
+
+  <div class="chat-main">
+        <div class="chat-header">
+            <h2>Social</h2>
+            <a href="../account/friends.html" class="btn">Friends</a>
+        </div>
+
+    <div id="chat-container"></div> 
+
+    <div class="chat-input-wrapper">
+      <div class="typing-indicator" id="typing-indicator"></div>
+      <div class="chat-controls">
+        <input type="text" id="message-input" placeholder="You must be logged in to chat." disabled maxlength="500">
+        <button id="send-btn" class="username-btn" disabled>Send</button>
+      </div>
+      <div class="char-count" id="char-count">0 / 500</div>
+    </div>
+  </div>
+</div>
+
+<div class="back-link">
+  <a href="../index.html" class="btn">Back</a>
+</div>
+
+<script type="module">
+  // Using corrected and stable Firebase SDK imports
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+  import { getDatabase, ref, push, onValue, set, onDisconnect, get, serverTimestamp, update } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
+    authDomain: "yikegames-website.firebaseapp.com",
+    databaseURL: "https://yikegames-website-default-rtdb.firebaseio.com/",
+    projectId: "yikegames-website",
+    storageBucket: "yikegames-website.firebasestorage.app",
+    messagingSenderId: "1086586566551",
+    appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
+    measurementId: "G-FXH0D07D86"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  let currentUser = null;
+  let currentDisplayName = null;
+  const usersCache = {};
+  let typingTimeout = null;
+  let isMessageListenerActive = false; 
+
+  const discordWebhookUrl = "https://discord.com/api/webhooks/1419226962643124336/kOCwAB9OGdalcetSAsG76w-WoaDjLW43y4DmavFgumUn383tY0TwvoEU1Goj4Oz6WeMq";
+  const defaultPfp = "https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png";
+
+  const chatContainer = document.getElementById("chat-container");
+  const messageInput = document.getElementById("message-input");
+  const sendBtn = document.getElementById("send-btn");
+  const charCount = document.getElementById("char-count");
+  const typingIndicator = document.getElementById("typing-indicator");
+  const userList = document.getElementById("user-list");
+
+  // Rate Limiter Class (unchanged)
+  class RateLimiter {
+    constructor(maxMessages, timeWindowMs) {
+      this.maxMessages = maxMessages;
+      this.timeWindowMs = timeWindowMs;
+      this.timestamps = [];
+    }
+    canSend() {
+      const now = Date.now();
+      this.timestamps = this.timestamps.filter(ts => now - ts < this.timeWindowMs);
+      return this.timestamps.length < this.maxMessages;
+    }
+    recordMessage() {
+      this.timestamps.push(Date.now());
+    }
+    getTimeUntilNextMessage() {
+      if (this.canSend()) return 0;
+      const oldestTimestamp = this.timestamps[0];
+      const timeUntilExpiry = this.timeWindowMs - (Date.now() - oldestTimestamp);
+      return Math.ceil(timeUntilExpiry / 1000);
+    }
+  }
+  const rateLimiter = new RateLimiter(5, 10000);
+
+  // XSS Protection (unchanged)
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  /* Get User Data (IsDeveloper check is removed) */
+  function getUserData(authorName) {
+    // Check if the author is the current user (fastest check)
+    if (currentUser && currentUser.displayName === authorName) {
+      return {
+        photoURL: currentUser.photoURL || usersCache[currentUser.uid]?.photoURL || defaultPfp,
+      };
+    }
+
+    // Search the cache by displayName or email
+    const userKeys = Object.keys(usersCache);
+    const userKey = userKeys.find(key => 
+      usersCache[key].displayName === authorName || usersCache[key].email === authorName
+    );
+    
+    if (userKey) {
+      return {
+        photoURL: usersCache[userKey].photoURL || defaultPfp,
+      };
+    }
+    
+    // Default fallback
+    return {
+      photoURL: defaultPfp,
+    };
+  }
+
+  // Format timestamp (unchanged)
+  function formatTimestamp(timestamp) {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    
+    if (isToday) {
+      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    } else {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + 
+             date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    }
+  }
+
+  // Mention logic (unchanged)
+  function checkForMention(messageText, currentUserName) {
+    if (!currentUserName || !messageText) return false;
+    const escapedUserName = currentUserName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const mentionPattern = new RegExp(`@${escapedUserName}\\b`, 'i');
+    return mentionPattern.test(messageText);
+  }
+
+  function highlightMentions(text, currentUserName) {
+    if (!currentUserName) return escapeHtml(text);
+    const escapedUserName = currentUserName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const mentionPattern = new RegExp(`(@${escapedUserName})\\b`, 'gi');
+    return escapeHtml(text).replace(mentionPattern, '<span class="mention-tag">$1</span>');
+  }
+
+  /* Insert Mention into Chatbox (unchanged) */
+  function insertMention(authorName) {
+      if (!currentDisplayName) {
+        alert("You must be logged in to mention others.");
+        return;
+      }
+      const mentionText = `@${authorName} `; 
+      
+      if (messageInput.value.includes(mentionText.trim())) {
+          return; 
+      }
+
+      messageInput.value = mentionText + messageInput.value.trim();
+      
+      const length = messageInput.value.length;
+      charCount.textContent = `${length} / 500`;
+
+      messageInput.focus();
+  }
+
+
+  // Event Listeners (unchanged)
+  messageInput.addEventListener('input', () => {
+    const length = messageInput.value.length;
+    charCount.textContent = `${length} / 500`;
+    charCount.classList.remove('warning', 'error');
+    if (length > 450) charCount.classList.add('warning');
+    if (length >= 500) charCount.classList.add('error');
+  });
+
+  messageInput.addEventListener('input', () => {
+    if (!currentUser) return;
+    const typingRef = ref(db, `users/${currentUser.uid}`);
+    update(typingRef, { typing: true }); 
+    
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      update(typingRef, { typing: false });
+    }, 2000);
+  });
+
+  // Listen for typing and online users (unchanged logic)
+  const usersRef = ref(db, "users");
+  onValue(usersRef, snapshot => {
+    const usersData = snapshot.val();
+    if (usersData) {
+      Object.assign(usersCache, usersData);
+      updateUserList(usersData);
+      updateTypingIndicator(usersData);
+    }
+  });
+
+  // Update user list (unchanged)
+  function updateUserList(usersData) {
+    userList.innerHTML = '';
+    
+    const users = Object.entries(usersData)
+      .filter(([uid, data]) => data.online === true) 
+      .sort((a, b) => (a[1].displayName || '').localeCompare(b[1].displayName || ''));
+    
+    if (users.length === 0) {
+      userList.innerHTML = '<p style="text-align: center; color: rgba(1, 237, 240, 0.5); padding: 20px;">No users online</p>';
+      return;
+    }
+
+    users.forEach(([uid, userData]) => {
+      const userItem = document.createElement('div');
+      userItem.className = 'user-item';
+      
+      const avatarWrapper = document.createElement('div');
+      avatarWrapper.className = 'user-avatar-wrapper';
+      
+      const avatar = document.createElement('img');
+      avatar.src = userData.photoURL || defaultPfp;
+      avatar.className = 'user-avatar-small';
+      avatar.alt = userData.displayName || 'User';
+      
+      const statusIndicator = document.createElement('div');
+      statusIndicator.className = `status-indicator ${userData.online ? 'online' : 'offline'}`;
+      
+      const userName = document.createElement('span');
+      userName.className = 'user-name';
+      userName.textContent = userData.displayName || userData.email?.split('@')[0] || 'Unknown';
+
+      avatarWrapper.appendChild(avatar);
+      avatarWrapper.appendChild(statusIndicator);
+      
+      userItem.appendChild(avatarWrapper);
+      userItem.appendChild(userName);
+      userList.appendChild(userItem);
+    });
+  }
+
+  // Update typing indicator (unchanged)
+  function updateTypingIndicator(usersData) {
+    const typingUsers = Object.entries(usersData)
+      .filter(([uid, data]) => data.typing && data.online && uid !== currentUser?.uid) 
+      .map(([uid, data]) => data.displayName || data.email?.split('@')[0]);
+    
+    if (typingUsers.length === 0) {
+      typingIndicator.textContent = '';
+    } else if (typingUsers.length === 1) {
+      typingIndicator.textContent = `${typingUsers[0]} is typing...`;
+    } else if (typingUsers.length === 2) {
+      typingIndicator.textContent = `${typingUsers[0]} and ${typingUsers[1]} are typing...`;
+    } else {
+      typingIndicator.textContent = `${typingUsers.length} people are typing...`;
+    }
+  }
+
+  /* Message Listener Function (Cleaned) */
+  function startChatListeners() {
+    if (isMessageListenerActive) return; 
+
+    const messagesRef = ref(db, "global-chat");
+    onValue(messagesRef, snapshot => {
+      const shouldScroll = chatContainer.scrollTop + chatContainer.clientHeight >= chatContainer.scrollHeight - 50;
+
+      chatContainer.innerHTML = "";
+      const data = snapshot.val();
+      if (!data) {
+          chatContainer.innerHTML = '<p style="text-align: center; color: rgba(1, 237, 240, 0.5); padding: 40px;">No messages yet. Be the first to say something!</p>';
+          return;
+      }
+
+      const messagesArray = Object.entries(data).sort((a, b) => a[1].timestamp - b[1].timestamp);
+
+      messagesArray.forEach(([id, msg]) => {
+        if (!msg || !msg.text || !msg.author) {
+          console.warn("Skipping incomplete chat message:", msg);
+          return;
+        }
+
+        const userData = getUserData(msg.author); 
+        
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message";
+
+        // Mention highlighting logic
+        if (currentDisplayName) {
+          const isNotSelf = msg.author.toLowerCase() !== currentDisplayName.toLowerCase();
+          const isMentioned = checkForMention(msg.text, currentDisplayName);
+
+          if (isNotSelf && isMentioned) {
+            messageDiv.classList.add("mention-highlight");
+          }
+        }
+
+        const avatar = document.createElement("img");
+        avatar.src = userData.photoURL; 
+        avatar.className = "message-avatar";
+        avatar.alt = msg.author;
+
+        const content = document.createElement("div");
+        content.className = "message-content";
+
+        const header = document.createElement("div");
+        header.className = "message-header";
+
+        const author = document.createElement("span");
+        author.className = "message-author";
+        
+        // Only the author's display name text remains
+        author.textContent = msg.author; 
+        
+        const timestamp = document.createElement("span");
+        timestamp.className = "message-timestamp";
+        timestamp.textContent = formatTimestamp(msg.timestamp);
+
+        const text = document.createElement("div");
+        text.className = "message-text";
+        text.innerHTML = highlightMentions(msg.text, currentDisplayName);
+
+        header.appendChild(author);
+        header.appendChild(timestamp);
+        content.appendChild(header);
+        content.appendChild(text);
+
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(content);
+
+        // Reply Button Logic
+        const replyButton = document.createElement("button");
+        replyButton.className = "reply-button";
+        replyButton.textContent = "Reply";
+        replyButton.dataset.author = msg.author; 
+
+        replyButton.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            insertMention(replyButton.dataset.author);
+        });
+        
+        if (currentDisplayName && msg.author.toLowerCase() !== currentDisplayName.toLowerCase()) {
+          messageDiv.appendChild(replyButton);
+        }
+        
+        chatContainer.appendChild(messageDiv);
+      });
+
+      if (shouldScroll) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    });
+
+    isMessageListenerActive = true;
+  }
+  /* --- END Message Listener Function --- */
+
+
+  // Authentication and Presence Management
+  onAuthStateChanged(auth, async user => {
+    currentUser = user;
+
+    if (user) {
+      const userRef = ref(db, `users/${user.uid}`);
+      let nameToUse = user.displayName || user.email.split('@')[0];
+      
+      const userSnapshot = await get(userRef);
+      
+      let userData = {};
+      if (userSnapshot.exists()) {
+        userData = userSnapshot.val();
+        nameToUse = userData.displayName || nameToUse;
+        
+        // Update user data on login/relogin
+        await update(userRef, {
+            displayName: nameToUse,
+            photoURL: user.photoURL || userData.photoURL || null,
+            email: user.email,
+        });
+      } else {
+        // New user login - create profile
+        await set(userRef, {
+          displayName: nameToUse,
+          photoURL: user.photoURL || null,
+          email: user.email,
+          online: false, 
+          typing: false,
+        });
+      }
+      
+      // Update cache and set display name
+      usersCache[user.uid] = { 
+        ...userData, 
+        displayName: nameToUse, 
+        photoURL: user.photoURL || userData.photoURL || null,
+      };
+      currentDisplayName = nameToUse; 
+
+      const onlineRef = ref(db, `.info/connected`);
+      
+      onValue(onlineRef, (snapshot) => {
+        if (snapshot.val() === true) {
+          update(userRef, {
+            online: true,
+            typing: false
+          });
+          
+          onDisconnect(userRef).update({
+            online: false,
+            typing: false
+          });
+        }
+      });
+      
+      startChatListeners();
+
+      messageInput.disabled = false;
+      sendBtn.disabled = false;
+      messageInput.placeholder = "Type your message...";
+    } else {
+      currentDisplayName = null;
+      currentUser = null;
+      messageInput.disabled = true;
+      sendBtn.disabled = true;
+      messageInput.placeholder = "You must be logged in to chat.";
+      
+      if (currentUser) {
+          update(ref(db, `users/${currentUser.uid}`), { typing: false });
+      }
+      
+      chatContainer.innerHTML = '<p style="text-align: center; color: rgba(1, 237, 240, 0.5); padding: 40px;">Please log in to view and send messages.</p>';
+      isMessageListenerActive = false;
+    }
+  });
+
+
+  // Discord webhook (unchanged)
+  async function sendToDiscord(username, message, avatarUrl) {
+    message = message + " - (***This was sent from the desktop client.***)"
+    const payload = {
+      username: username,
+      content: message
+    };
+    
+    if (avatarUrl) {
+      payload.avatar_url = avatarUrl;
+    }
+
+    try {
+      const response = await fetch(discordWebhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        console.error("Failed to send to Discord:", response.status);
+      }
+    } catch (error) {
+      console.error("Error sending to Discord:", error);
+    }
+  }
+
+  // Send message (unchanged)
+  sendBtn.addEventListener("click", () => {
+    if (!currentDisplayName) {
+      alert("You must be logged in to send messages.");
+      return;
+    }
+
+    if (!rateLimiter.canSend()) {
+      const waitTime = rateLimiter.getTimeUntilNextMessage();
+      alert(`Please slow down! Wait ${waitTime} seconds before sending another message.`);
+      return;
+    }
+
+    const text = messageInput.value.trim();
+    if (!text) return;
+
+    if (text.length > 500) {
+      alert("Message is too long. Maximum 500 characters.");
+      return;
+    }
+
+    const displayName = currentDisplayName;
+    const photoUrl = getUserData(displayName).photoURL;
+
+    rateLimiter.recordMessage();
+
+    const newMsgRef = push(ref(db, "global-chat"));
+    set(newMsgRef, {
+      author: displayName,
+      text,
+      timestamp: serverTimestamp()
+    });
+
+    sendToDiscord(displayName, text, photoUrl);
+
+    if (currentUser) {
+      update(ref(db, `users/${currentUser.uid}`), { typing: false });
+    }
+
+    messageInput.value = "";
+    charCount.textContent = "0 / 500";
+    charCount.classList.remove('warning', 'error');
+  });
+
+  // Enter key to send (unchanged)
+  messageInput.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !messageInput.disabled) {
+      e.preventDefault();
+      sendBtn.click();
+    }
+  });
+
+  // Page transitions (unchanged)
+  document.body.classList.add('fade-enter');
+  setTimeout(() => {
+    document.body.classList.add('fade-enter-active');
+  }, 10);
+
+  document.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href && !href.startsWith('http')) {
+        e.preventDefault();
+        document.body.classList.remove('fade-enter-active');
+        document.body.classList.add('fade-exit-active');
+        setTimeout(() => { window.location.href = href; }, 500);
+      }
+    });
+  });
+</script>
+</body>
+</html>
+
