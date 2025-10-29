@@ -38,7 +38,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-        import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+        import { getDatabase, ref, get, set, remove, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -65,7 +65,7 @@
 
         async function loadUserProfile() {
             const urlParams = new URLSearchParams(window.location.search);
-            const userId = urlParams.get('uid');
+            const username = urlParams.get('u');
 
             const displayNameEl = document.getElementById('user-display-name');
             const pfpEl = document.getElementById('pfp-display');
@@ -73,39 +73,58 @@
             const socialsEl = document.getElementById('user-socials');
             const joinDateEl = document.getElementById('user-join-date');
             const friendStatusContainer = document.getElementById('friend-status-container');
+            const profileContainer = document.querySelector('.profile-container');
 
-            if (!userId) {
-                displayNameEl.textContent = 'User not found';
+            if (!username) {
+                displayNameEl.textContent = 'User not specified';
                 return;
             }
 
             try {
-                const userRef = ref(db, `users/${userId}`);
-                const snapshot = await get(userRef);
+                const usersRef = ref(db, 'users');
+                const userQuery = query(usersRef, orderByChild('displayName'), equalTo(username));
+                const snapshot = await get(userQuery);
 
                 if (!snapshot.exists()) {
                     displayNameEl.textContent = 'User not found';
                     return;
                 }
 
-                const data = snapshot.val();
+                const userData = snapshot.val();
+                const userId = Object.keys(userData)[0];
+                const data = userData[userId];
 
                 displayNameEl.textContent = data.displayName || 'Unnamed User';
                 pfpEl.src = data.photoURL || 'https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png';
                 bioEl.textContent = data.profile?.description || 'No bio yet.';
                 joinDateEl.textContent = `Joined ${new Date(data.creationTime).toLocaleDateString()}`;
 
-                if (data.profile?.profileColor) {
-                    document.body.style.setProperty('--profile-color', data.profile.profileColor);
+                if (data.profile?.profilePanelColor) {
+                    profileContainer.style.backgroundColor = data.profile.profilePanelColor;
                 }
+                if (data.profile?.profileTextColor) {
+                    profileContainer.style.color = data.profile.profileTextColor;
+                }
+
                 if (data.profile?.accentColor) {
                     document.body.style.setProperty('--accent-color', data.profile.accentColor);
                 }
                 if (data.profile?.buttonHoverColor) {
                     document.body.style.setProperty('--button-hover-color', data.profile.buttonHoverColor);
                 }
-                if (data.profile?.profileBackgroundColor) {
-                    document.body.style.setProperty('--profile-background-color', data.profile.profileBackgroundColor);
+                if (data.profile?.profileBackgroundType === 'image' && data.profile?.profileBackgroundImageUrl) {
+                    document.body.style.backgroundImage = `url(${data.profile.profileBackgroundImageUrl})`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundAttachment = 'fixed';
+                    document.body.style.backgroundPosition = 'center';
+                    document.body.style.backgroundColor = 'transparent'; // Ensure color doesn't show through
+                } else if (data.profile?.profileBackgroundColor) {
+                    document.body.style.backgroundColor = data.profile.profileBackgroundColor;
+                    document.body.style.backgroundImage = 'none';
+                }
+
+                if (data.profile?.profileBorderColor) {
+                    document.body.style.setProperty('--profile-border-color', data.profile.profileBorderColor);
                 }
 
                 const profileViewsRef = ref(db, `users/${userId}/profile/profileViews`);
@@ -114,6 +133,9 @@
                 document.getElementById('profile-views').textContent = `Profile Views: ${currentViews + 1}`;
 
                 socialsEl.innerHTML = '';
+                let hasSocialLinks = false;
+
+                // Display existing social links (Twitter, GitHub, etc.)
                 if (data.profile?.socials && Object.keys(data.profile.socials).length > 0) {
                     for (const [platform, handle] of Object.entries(data.profile.socials)) {
                         if (!handle) continue;
@@ -123,8 +145,25 @@
                         link.target = '_blank';
                         link.rel = 'noopener noreferrer';
                         socialsEl.appendChild(link);
+                        hasSocialLinks = true;
                     }
-                } else {
+                }
+
+                // Display custom social links
+                if (data.profile?.customSocials && Object.keys(data.profile.customSocials).length > 0) {
+                    Object.values(data.profile.customSocials).forEach(linkData => {
+                        if (!linkData.url || !linkData.displayName) return;
+                        const link = document.createElement('a');
+                        link.href = linkData.url;
+                        link.textContent = linkData.displayName;
+                        link.target = '_blank';
+                        link.rel = 'noopener noreferrer';
+                        socialsEl.appendChild(link);
+                        hasSocialLinks = true;
+                    });
+                }
+
+                if (!hasSocialLinks) {
                     socialsEl.textContent = 'No social links added yet.';
                 }
 

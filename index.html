@@ -62,12 +62,41 @@ details pre {
   margin-top: 5px;
   color: #fff;
 }
+.search-results-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+.search-result-item a {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    text-decoration: none;
+    color: #01edf0;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+.search-result-item a:hover {
+    background-color: rgba(1, 237, 240, 0.1);
+}
+.search-result-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+}
+.search-result-item span {
+    font-size: 1.1rem;
+}
 </style>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getDatabase, ref, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+import { getDatabase, ref, get, query, orderByChild, startAt, endAt } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 // --- Firebase Config ---
 const firebaseConfig = {
@@ -194,29 +223,75 @@ document.addEventListener('DOMContentLoaded', () => {
     searchIcon.addEventListener('click', () => searchModal.classList.remove('hidden'));
     closeSearchModalBtn.addEventListener('click', () => searchModal.classList.add('hidden'));
 
-    searchForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = searchUsernameInput.value.trim();
-        if (!username) return;
+        searchForm.addEventListener('submit', async (e) => {
 
-        searchStatus.textContent = 'Searching...';
-        try {
-            const usersRef = ref(db, 'users');
-            const userQuery = query(usersRef, orderByChild('displayName'), equalTo(username));
-            const snapshot = await get(userQuery);
+            e.preventDefault();
 
-            if (snapshot.exists()) {
-                const userData = snapshot.val();
-                const userId = Object.keys(userData)[0];
-                window.location.href = `account/profile.html?uid=${userId}`;
-            } else {
-                searchStatus.textContent = `User "${username}" not found.`;
+            const searchTerm = searchUsernameInput.value.trim();
+
+            if (!searchTerm) return;
+
+    
+
+            searchStatus.innerHTML = 'Searching...';
+
+            try {
+
+                const usersRef = ref(db, 'users');
+
+                const userQuery = query(usersRef, orderByChild('displayName'), startAt(searchTerm), endAt(searchTerm + '\uf8ff'));
+
+                const snapshot = await get(userQuery);
+
+    
+
+                if (snapshot.exists()) {
+
+                    const usersData = snapshot.val();
+
+                    let resultsHtml = '<ul class="search-results-list">';
+
+                    for (const uid in usersData) {
+
+                        const user = usersData[uid];
+
+                        resultsHtml += `
+
+                            <li class="search-result-item">
+
+                                <a href="user/profile.html?u=${user.displayName}">
+
+                                    <img src="${user.photoURL || 'https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png'}" alt="${user.displayName}'s profile picture">
+
+                                    <span>${user.displayName}</span>
+
+                                </a>
+
+                            </li>
+
+                        `;
+
+                    }
+
+                    resultsHtml += '</ul>';
+
+                    searchStatus.innerHTML = resultsHtml;
+
+                } else {
+
+                    searchStatus.textContent = `No users found starting with "${searchTerm}".`;
+
+                }
+
+            } catch (err) {
+
+                console.error(err);
+
+                searchStatus.textContent = 'Error searching for user.';
+
             }
-        } catch (err) {
-            console.error(err);
-            searchStatus.textContent = 'Error searching for user.';
-        }
-    });
+
+        });
 
     // Fade transitions
     document.body.classList.add('fade-enter');
@@ -345,7 +420,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     notification.classList.add('notification');
                     notification.innerHTML = `
                         <p>You have a new friend request!</p>
-                        <a href="/account/profile.html?uid=${snapshot.key}">View Profile</a>
+                    const user = users[snapshot.key];
+                    if (user) {
+                        const username = user.displayName;
+                        userListHTML += `<li><a href="/user/profile.html?u=${username}">${username}</a></li>`;
+                    }
                     `;
                     notificationContainer.appendChild(notification);
                     notificationContainer.classList.remove('hidden');

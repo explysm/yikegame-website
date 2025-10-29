@@ -1,11 +1,14 @@
 /* General Body Styles */
 body {
-    background-color: #121212;
-    color: #e0e0e0;
+    background-color: var(--profile-background-color, #121212);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.6;
     margin: 0;
     padding: 2rem;
+    /* Default accent and button hover colors */
+    --accent-color: #333333;
+    --button-hover-color: #444444;
+    --profile-panel-color: #1e1e1e;
 }
 
 /* Back Arrow */
@@ -27,7 +30,8 @@ body {
     max-width: 700px;
     margin: 2rem auto;
     padding: 2rem;
-    background-color: var(--profile-background-color, #1e1e1e);
+    background-color: #1e1e1e; /* Default color, will be overridden by JS */
+    color: #e0e0e0; /* Default text color, will be overridden by JS */
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     text-align: center;
@@ -42,8 +46,8 @@ body {
     width: 150px;
     height: 150px;
     border-radius: 50%;
-    border: 4px solid var(--accent-color, #333);
     object-fit: cover;
+    border: 4px solid var(--profile-border-color, #333);
     transition: transform 0.3s ease;
 }
 
@@ -55,12 +59,11 @@ body {
     margin-top: 1rem;
     font-size: 2.5rem;
     font-weight: bold;
-    color: #ffffff;
 }
 
 #user-join-date {
     font-size: 1rem;
-    color: #a0a0a0;
+    opacity: 0.8;
     margin-top: -0.5rem;
 }
 
@@ -72,21 +75,19 @@ body {
 .profile-section {
     margin-top: 2rem;
     padding: 1.5rem;
-    border: 1px solid var(--accent-color, #333);
+    border: 1px solid var(--profile-border-color, #333);
     border-radius: 8px;
 }
 
 .profile-section h2 {
     font-size: 1.8rem;
-    color: #ffffff;
     margin-bottom: 1rem;
-    border-bottom: 2px solid var(--accent-color, #444);
+    border-bottom: 2px solid var(--profile-border-color, #444);
     padding-bottom: 0.5rem;
 }
 
 #user-bio {
     font-size: 1.1rem;
-    color: #c0c0c0;
     white-space: pre-wrap; /* Respects line breaks in the bio */
 }
 
@@ -96,7 +97,7 @@ body {
     margin: 0.5rem;
     padding: 0.8rem 1.2rem;
     background-color: var(--accent-color, #333);
-    color: #e0e0e0;
+    color: inherit;
     text-decoration: none;
     border-radius: 8px;
     transition: background-color 0.3s ease, transform 0.2s ease;
@@ -109,8 +110,13 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+
     .profile-container {
         padding: 1.5rem;
+        margin: 1rem auto;
     }
 
     #user-display-name {
@@ -120,5 +126,25 @@ body {
     .pfp-image {
         width: 120px;
         height: 120px;
+    }
+
+    .profile-section h2 {
+        font-size: 1.5rem;
+    }
+
+    #user-bio {
+        font-size: 1rem;
+    }
+
+    .social-links-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .social-links-container a {
+        margin: 0;
+        width: 100%;
+        box-sizing: border-box;
     }
 }

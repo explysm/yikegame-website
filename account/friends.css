@@ -10,6 +10,27 @@
     border-radius: 8px;
     padding: 20px;
     text-align: center;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden; /* Ensures the overlay respects the border radius */
+}
+
+.friend-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
+    border-radius: 8px;
+    z-index: 1; /* Sits above the background but below the content */
+}
+
+.friend-card > * {
+    position: relative; /* To appear above the overlay */
+    z-index: 2;
 }
 
 .friend-card img {
@@ -23,6 +44,8 @@
 .friend-card h4 {
     margin: 0;
     font-size: 1.2rem;
+    color: #fff; /* White color for better contrast */
+    text-shadow: 0 0 5px rgba(0,0,0,0.7); /* Text shadow for readability */
 }
 
 .friend-card .btn {

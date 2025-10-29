@@ -42,6 +42,10 @@
                     <input type="file" id="pfp-input" class="pfp-input-field" accept="image/*">
                     <button class="btn pfp-btn" onclick="changePfp()">Change PFP</button>
                 </div>
+                <div class="form-group" style="margin-top: 30px; border-top: 2px solid #d9534f; padding-top: 20px;">
+                    <label style="color: #d9534f; font-weight: bold;">Danger Zone</label>
+                    <button class="btn" style="background-color: #d9534f; border-color: #d43f3a;" onclick="deleteAccount()">Delete My Account</button>
+                </div>
             </div>
             <div class="tab-content" id="profile-tab">
                 <h3>Edit Profile</h3>
@@ -59,8 +63,37 @@
                         <input type="color" id="button-hover-color" class="input-field" value="#444444">
                     </div>
                     <div class="form-group">
+                        <label>Profile Background Type</label>
+                        <div>
+                            <input type="radio" id="bg-type-color" name="background-type" value="color" checked>
+                            <label for="bg-type-color">Solid Color</label>
+                            <input type="radio" id="bg-type-image" name="background-type" value="image">
+                            <label for="bg-type-image">Image</label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="profile-background-color-group">
                         <label for="profile-background-color">Profile Background Color</label>
                         <input type="color" id="profile-background-color" class="input-field" value="#1e1e1e">
+                    </div>
+                    <div class="form-group" id="profile-background-image-group" style="display: none;">
+                        <label for="profile-background-image-input">Profile Background Image</label>
+                        <input type="file" id="profile-background-image-input" class="pfp-input-field" accept="image/*">
+                        <button type="button" class="btn" id="upload-background-image-btn">Upload Background Image</button>
+                        <p id="background-image-status"></p>
+                        <img id="profile-background-image-preview" src="" alt="Background Preview" style="max-width: 100%; height: auto; margin-top: 10px; display: none;">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-text-color">Profile Text Color</label>
+                        <input type="color" id="profile-text-color" class="input-field" value="#e0e0e0">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-panel-color">Profile Panel Color</label>
+                        <input type="color" id="profile-panel-color" class="input-field" value="#1e1e1e">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profile-border-color">Profile Border Color</label>
+                        <input type="color" id="profile-border-color" class="input-field" value="#01edf0">
                     </div>
                     <button type="submit" class="btn">Save Changes</button>
                 </form>
@@ -75,6 +108,20 @@
                     <div class="form-group">
                         <label for="github">GitHub Handle</label>
                         <input type="text" id="github" class="input-field" placeholder="Your GitHub username">
+                    </div>
+                    <hr style="margin: 20px 0; border-color: #01edf050;">
+                    <h3>Custom Social Links</h3>
+                    <div class="form-group">
+                        <label for="socialDisplayName">Display Name</label>
+                        <input type="text" id="socialDisplayName" class="input-field" placeholder="e.g., My Website">
+                    </div>
+                    <div class="form-group">
+                        <label for="socialUrl">URL</label>
+                        <input type="url" id="socialUrl" class="input-field" placeholder="https://example.com">
+                    </div>
+                    <button type="button" id="add-social-link-btn" class="btn">Add Custom Link</button>
+                    <div id="custom-social-links-list" class="social-links-container">
+                        <!-- Custom social links will be loaded here -->
                     </div>
                     <button type="submit" class="btn">Save Changes</button>
                 </form>
@@ -103,8 +150,8 @@
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-        import { getDatabase, ref, get, set, remove, query, orderByChild, equalTo, update as dbUpdate } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged, updateProfile, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+        import { getDatabase, ref, get, set, remove, query, orderByChild, equalTo, update as dbUpdate, push } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
@@ -199,7 +246,7 @@
                 document.getElementById("user-display-name").textContent = user.displayName || user.email;
                 document.getElementById("user-join-date").textContent = new Date(user.metadata.creationTime).toLocaleDateString();
                 pfpDisplay.src = user.photoURL || DEFAULT_PFP_URL;
-                document.getElementById('view-profile-btn').href = `profile.html?uid=${user.uid}`;
+                document.getElementById('view-profile-btn').href = `../user/profile.html?u=${user.displayName}`;
 
                 const userRef = ref(db, `users/${user.uid}`);
                 const snapshot = await get(userRef);
@@ -218,8 +265,12 @@
                 if (userData && userData.profile) {
                     document.getElementById('bio').value = userData.profile.description || '';
                     if (userData.profile.socials) {
+                        // Existing Twitter and GitHub (if any)
                         document.getElementById('twitter').value = userData.profile.socials.twitter || '';
                         document.getElementById('github').value = userData.profile.socials.github || '';
+                    }
+                    if (userData.profile.customSocials) {
+                        displayCustomSocialLinks(userData.profile.customSocials);
                     }
                     if (userData.profile.accentColor) {
                         document.getElementById('accent-color').value = userData.profile.accentColor;
@@ -230,6 +281,28 @@
                     if (userData.profile.profileBackgroundColor) {
                         document.getElementById('profile-background-color').value = userData.profile.profileBackgroundColor;
                     }
+                    if (userData.profile.profileTextColor) {
+                        document.getElementById('profile-text-color').value = userData.profile.profileTextColor;
+                    }
+                    if (userData.profile.profilePanelColor) {
+                        document.getElementById('profile-panel-color').value = userData.profile.profilePanelColor;
+                    }
+
+                    if (userData.profile.profileBorderColor) {
+                        document.getElementById('profile-border-color').value = userData.profile.profileBorderColor;
+                    }
+
+                    // Load profile background type and image
+                    if (userData.profile.profileBackgroundType === 'image') {
+                        bgTypeImage.checked = true;
+                        if (userData.profile.profileBackgroundImageUrl) {
+                            profileBackgroundImagePreview.src = userData.profile.profileBackgroundImageUrl;
+                            profileBackgroundImagePreview.style.display = 'block';
+                        }
+                    } else {
+                        bgTypeColor.checked = true;
+                    }
+                    toggleBackgroundType(); // Apply initial display state
                 }
             } else {
                 window.location.href = "login.html";
@@ -329,6 +402,71 @@
             }
         };
 
+        // --- Profile Background Logic ---
+        const bgTypeColor = document.getElementById('bg-type-color');
+        const bgTypeImage = document.getElementById('bg-type-image');
+        const profileBackgroundColorGroup = document.getElementById('profile-background-color-group');
+        const profileBackgroundImageGroup = document.getElementById('profile-background-image-group');
+        const profileBackgroundImageInput = document.getElementById('profile-background-image-input');
+        const uploadBackgroundImageBtn = document.getElementById('upload-background-image-btn');
+        const backgroundImageStatus = document.getElementById('background-image-status');
+        const profileBackgroundImagePreview = document.getElementById('profile-background-image-preview');
+
+        function toggleBackgroundType() {
+            if (bgTypeColor.checked) {
+                profileBackgroundColorGroup.style.display = 'block';
+                profileBackgroundImageGroup.style.display = 'none';
+            } else {
+                profileBackgroundColorGroup.style.display = 'none';
+                profileBackgroundImageGroup.style.display = 'block';
+            }
+        }
+
+        bgTypeColor.addEventListener('change', toggleBackgroundType);
+        bgTypeImage.addEventListener('change', toggleBackgroundType);
+
+        uploadBackgroundImageBtn.addEventListener('click', async () => {
+            const file = profileBackgroundImageInput.files[0];
+            const user = auth.currentUser;
+
+            if (!user) return alert("You must be logged in to upload a background image!");
+            if (!file) return alert("Please select an image to upload!");
+
+            uploadBackgroundImageBtn.disabled = true;
+            profileBackgroundImageInput.disabled = true;
+            backgroundImageStatus.textContent = 'Uploading...';
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) throw new Error('Cloudinary upload failed!');
+
+                const data = await response.json();
+                const imageUrl = data.secure_url;
+
+                // Save the image URL to Firebase
+                await dbUpdate(ref(db, `users/${user.uid}/profile`), { profileBackgroundImageUrl: imageUrl });
+
+                profileBackgroundImagePreview.src = imageUrl;
+                profileBackgroundImagePreview.style.display = 'block';
+                profileBackgroundImageInput.value = '';
+                backgroundImageStatus.textContent = 'Background image uploaded successfully!';
+            } catch (error) {
+                console.error("Failed to upload background image:", error);
+                backgroundImageStatus.textContent = `Failed to upload background image: ${error.message}`;
+            } finally {
+                uploadBackgroundImageBtn.disabled = false;
+                profileBackgroundImageInput.disabled = false;
+            }
+        });
+
         // --- Logout Logic ---
         window.logout = async function() {
             try {
@@ -385,7 +523,11 @@
                 description: document.getElementById('bio').value,
                 accentColor: document.getElementById('accent-color').value,
                 buttonHoverColor: document.getElementById('button-hover-color').value,
-                profileBackgroundColor: document.getElementById('profile-background-color').value
+                profileBackgroundColor: document.getElementById('profile-background-color').value,
+                profileTextColor: document.getElementById('profile-text-color').value,
+                profilePanelColor: document.getElementById('profile-panel-color').value,
+                profileBorderColor: document.getElementById('profile-border-color').value,
+                profileBackgroundType: document.querySelector('input[name="background-type"]:checked').value
             };
 
             const userProfileRef = ref(db, `users/${user.uid}/profile`);
@@ -394,16 +536,123 @@
             alert('Profile updated successfully!');
         });
 
-        // --- Socials Logic ---
+        // --- Custom Social Links Logic ---
+        const customSocialLinksList = document.getElementById('custom-social-links-list');
+        const socialDisplayNameInput = document.getElementById('socialDisplayName');
+        const socialUrlInput = document.getElementById('socialUrl');
+        const addSocialLinkBtn = document.getElementById('add-social-link-btn');
+
+        function displayCustomSocialLinks(socials) {
+            customSocialLinksList.innerHTML = '';
+            if (!socials) return;
+
+            Object.entries(socials).forEach(([key, link]) => {
+                const linkDiv = document.createElement('div');
+                linkDiv.className = 'social-link-item';
+                linkDiv.innerHTML = `
+                    <span>${link.displayName}: <a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.url}</a></span>
+                    <button class="btn btn-small edit-social-link" data-key="${key}">Edit</button>
+                    <button class="btn btn-small remove-social-link" data-key="${key}">Remove</button>
+                `;
+                customSocialLinksList.appendChild(linkDiv);
+            });
+
+            document.querySelectorAll('.edit-social-link').forEach(button => {
+                button.addEventListener('click', (e) => editSocialLink(e.target.dataset.key));
+            });
+            document.querySelectorAll('.remove-social-link').forEach(button => {
+                button.addEventListener('click', (e) => removeSocialLink(e.target.dataset.key));
+            });
+        }
+
+        addSocialLinkBtn.addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (!user) return alert('You must be logged in to add social links!');
+
+            const displayName = socialDisplayNameInput.value.trim();
+            const url = socialUrlInput.value.trim();
+
+            if (!displayName || !url) {
+                return alert('Please enter both a display name and a URL for the social link.');
+            }
+            if (!/^https?:\/\//i.test(url)) {
+                return alert('Please enter a valid URL starting with http:// or https://');
+            }
+
+            try {
+                const userSocialsRef = ref(db, `users/${user.uid}/profile/customSocials`);
+                const newSocialRef = await push(userSocialsRef); // Generate a unique key
+                await set(newSocialRef, { displayName, url });
+
+                socialDisplayNameInput.value = '';
+                socialUrlInput.value = '';
+                
+                const snapshot = await get(userSocialsRef);
+                displayCustomSocialLinks(snapshot.val());
+                alert('Social link added successfully!');
+            } catch (error) {
+                console.error('Error adding social link:', error);
+                alert('Failed to add social link: ' + error.message);
+            }
+        });
+
+        async function editSocialLink(key) {
+            const user = auth.currentUser;
+            if (!user) return alert('You must be logged in to edit social links!');
+
+            const userSocialsRef = ref(db, `users/${user.uid}/profile/customSocials/${key}`);
+            const snapshot = await get(userSocialsRef);
+            const currentLink = snapshot.val();
+
+            if (currentLink) {
+                const newDisplayName = prompt('Edit Display Name:', currentLink.displayName);
+                const newUrl = prompt('Edit URL:', currentLink.url);
+
+                if (newDisplayName !== null && newUrl !== null) {
+                    if (!newDisplayName.trim() || !newUrl.trim()) {
+                        return alert('Display name and URL cannot be empty.');
+                    }
+                    if (!/^https?:\/\//i.test(newUrl)) {
+                        return alert('Please enter a valid URL starting with http:// or https://');
+                    }
+                    await dbUpdate(userSocialsRef, { displayName: newDisplayName, url: newUrl });
+                    const updatedSnapshot = await get(ref(db, `users/${user.uid}/profile/customSocials`));
+                    displayCustomSocialLinks(updatedSnapshot.val());
+                    alert('Social link updated successfully!');
+                }
+            }
+        }
+
+        async function removeSocialLink(key) {
+            const user = auth.currentUser;
+            if (!user) return alert('You must be logged in to remove social links!');
+
+            if (confirm('Are you sure you want to remove this social link?')) {
+                try {
+                    const userSocialsRef = ref(db, `users/${user.uid}/profile/customSocials/${key}`);
+                    await remove(userSocialsRef);
+                    const snapshot = await get(ref(db, `users/${user.uid}/profile/customSocials`));
+                    displayCustomSocialLinks(snapshot.val());
+                    alert('Social link removed successfully!');
+                } catch (error) {
+                    console.error('Error removing social link:', error);
+                    alert('Failed to remove social link: ' + error.message);
+                }
+            }
+        }
+
         document.getElementById('socials-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const user = auth.currentUser;
             if (!user) return;
 
+            const twitterHandle = document.getElementById('twitter').value.trim();
+            const githubHandle = document.getElementById('github').value.trim();
+
             const socialData = {
                 socials: {
-                    twitter: document.getElementById('twitter').value,
-                    github: document.getElementById('github').value
+                    twitter: twitterHandle,
+                    github: githubHandle
                 }
             };
 
@@ -416,6 +665,46 @@
         // --- Tab Switching Logic ---
         const navItems = document.querySelectorAll('.nav-item');
         const tabContents = document.querySelectorAll('.tab-content');
+
+        window.deleteAccount = async function() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const confirmation = prompt(`This action is irreversible. You will lose all your data, including profile, friends, and posts. To confirm, please type your username "${user.displayName}":`);
+
+            if (confirmation === null) {
+                alert("Account deletion cancelled.");
+                return;
+            }
+
+            if (confirmation !== user.displayName) {
+                alert("Username does not match. Account deletion cancelled.");
+                return;
+            }
+
+            try {
+                const uid = user.uid;
+                const username = user.displayName;
+
+                // 1. Delete user data from Realtime Database
+                const userRef = ref(db, `users/${uid}`);
+                await remove(userRef);
+
+                // 2. Delete username from the usernames index
+                const usernameRef = ref(db, `usernames/${username}`);
+                await remove(usernameRef);
+
+                // 3. Delete user from Firebase Authentication
+                await deleteUser(user);
+
+                alert("Your account has been successfully deleted.");
+                window.location.href = "../index.html";
+
+            } catch (error) {
+                console.error("Error deleting account:", error);
+                alert("An error occurred while deleting your account. You may need to log out and log back in to complete this action.\n" + error.message);
+            }
+        };
 
         navItems.forEach(item => {
             item.addEventListener('click', (e) => {

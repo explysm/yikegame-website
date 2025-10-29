@@ -62,11 +62,19 @@
                     const userSnapshot = await get(userRef);
                     if (userSnapshot.exists()) {
                         const userData = userSnapshot.val();
+                        let cardStyle = '';
+                        if (userData.profile) {
+                            if (userData.profile.profileBackgroundType === 'image' && userData.profile.profileBackgroundImageUrl) {
+                                cardStyle = `style="background-image: url(${userData.profile.profileBackgroundImageUrl}); background-size: cover; background-position: center;"`;
+                            } else if (userData.profile.profileBackgroundColor) {
+                                cardStyle = `style="background-color: ${userData.profile.profileBackgroundColor};"`;
+                            }
+                        }
                         friendsHtml += `
-                            <div class="friend-card">
+                            <div class="friend-card" ${cardStyle}>
                                 <img src="${userData.photoURL || 'https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png'}" alt="${userData.displayName}'s Profile Picture">
                                 <h4>${userData.displayName}</h4>
-                                <a href="profile.html?uid=${friendUid}" class="btn">View Profile</a>
+                                <a href="../user/profile.html?u=${userData.displayName}" class="btn">View Profile</a>
                             </div>
                         `;
                     }
