@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             <li class="search-result-item">
 
-                                <a href="user/profile.html?u=${user.displayName}">
+                                <a href="user/index.html?u=${user.displayName}">
 
                                     <img src="${user.photoURL || 'https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png'}" alt="${user.displayName}'s profile picture">
 
@@ -423,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const user = users[snapshot.key];
                     if (user) {
                         const username = user.displayName;
-                        userListHTML += `<li><a href="/user/profile.html?u=${username}">${username}</a></li>`;
+                        userListHTML += `<li><a href="/user/index.html?u=${username}">${username}</a></li>`;
                     }
                     `;
                     notificationContainer.appendChild(notification);

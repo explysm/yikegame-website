@@ -246,7 +246,7 @@
                 document.getElementById("user-display-name").textContent = user.displayName || user.email;
                 document.getElementById("user-join-date").textContent = new Date(user.metadata.creationTime).toLocaleDateString();
                 pfpDisplay.src = user.photoURL || DEFAULT_PFP_URL;
-                document.getElementById('view-profile-btn').href = `../user/profile.html?u=${user.displayName}`;
+                document.getElementById('view-profile-btn').href = `../user/index.html?u=${user.displayName}`;
 
                 const userRef = ref(db, `users/${user.uid}`);
                 const snapshot = await get(userRef);
