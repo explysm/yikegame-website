@@ -71,7 +71,7 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 302,
       headers: {
-        Location: `/account/profile.html?lastfm_linked=success`,
+        Location: `/user/index.html?lastfm_linked=success`,
       },
     };
 
