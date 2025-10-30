@@ -132,9 +132,17 @@
                 }
 
                 const profileViewsRef = ref(db, `users/${userId}/profile/profileViews`);
-                const currentViews = (await get(profileViewsRef)).val() || 0;
-                await set(profileViewsRef, currentViews + 1);
-                document.getElementById('profile-views').textContent = `Profile Views: ${currentViews + 1}`;
+                let currentViews = ((await get(profileViewsRef)).val() || 0);
+
+                if (currentUser) {
+                    try {
+                        await set(profileViewsRef, currentViews + 1);
+                        currentViews++;
+                    } catch (e) {
+                        console.warn("Could not increment profile views.", e);
+                    }
+                }
+                document.getElementById('profile-views').textContent = `Profile Views: ${currentViews}`;
 
                 socialsEl.innerHTML = '';
                 let hasSocialLinks = false;
@@ -265,8 +273,6 @@
 
             loadUserProfile(); // Refresh the profile to show the updated status
         }
-
-        window.addEventListener('DOMContentLoaded', loadUserProfile);
     </script>
 </body>
 </html>
