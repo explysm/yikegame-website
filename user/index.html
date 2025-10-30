@@ -25,14 +25,6 @@
             <p id="profile-views">Loading...</p>
         </div>
         <div class="profile-body">
-            <section class="profile-section">
-                <h2>About Me</h2>
-                <p id="user-bio">Loading...</p>
-            </section>
-            <section class="profile-section">
-                <h2>Social Links</h2>
-                <div id="user-socials" class="social-links-container">Loading...</div>
-            </section>
             <section class="profile-section" id="lastfm-now-playing-section" style="display: none;">
                 <h2>Currently Listening</h2>
                 <div id="lastfm-now-playing">
@@ -40,6 +32,10 @@
                     <p id="lastfm-track-info"></p>
                     <a id="lastfm-track-link" href="#" target="_blank" rel="noopener noreferrer" style="display: none;">View on Last.fm</a>
                 </div>
+            </section>
+            <section class="profile-section">
+                <h2>About Me</h2>
+                <p id="user-bio">Loading...</p>
             </section>
         </div>
     </main>
@@ -185,29 +181,31 @@
                     const lastfmResponse = await fetch(`/.netlify/functions/lastfm-song?userId=${userId}`);
                     if (lastfmResponse.ok) {
                         const track = await lastfmResponse.json();
-                        lastfmNowPlayingSection.style.display = 'block';
-                        lastfmTrackInfo.textContent = `${track.artist['#text']} - ${track.name}`;
-                        lastfmTrackLink.href = track.url;
-                        lastfmTrackLink.style.display = 'inline-block';
+                        // Check if the track is actually playing before displaying the section
+                        if (track['@attr'] && track['@attr'].nowplaying === 'true') {
+                            lastfmNowPlayingSection.style.display = 'block';
+                            lastfmTrackInfo.textContent = `${track.artist['#text']} - ${track.name}`;
+                            lastfmTrackLink.href = track.url;
+                            lastfmTrackLink.style.display = 'inline-block';
 
-                        const albumArt = track.image.find(img => img.size === 'large') || track.image[0];
-                        if (albumArt && albumArt['#text']) {
-                            lastfmAlbumArt.src = albumArt['#text'];
-                            lastfmAlbumArt.style.display = 'block';
+                            const albumArt = track.image.find(img => img.size === 'large') || track.image[0];
+                            if (albumArt && albumArt['#text']) {
+                                lastfmAlbumArt.src = albumArt['#text'];
+                                lastfmAlbumArt.style.display = 'block';
+                            } else {
+                                lastfmAlbumArt.style.display = 'none';
+                            }
                         } else {
-                            lastfmAlbumArt.style.display = 'none';
+                            // No song currently playing, keep section hidden
+                            lastfmNowPlayingSection.style.display = 'none';
                         }
                     } else if (lastfmResponse.status === 404) {
-                        lastfmNowPlayingSection.style.display = 'block';
-                        lastfmTrackInfo.textContent = 'No song currently playing or Last.fm not linked.';
-                        lastfmAlbumArt.style.display = 'none';
-                        lastfmTrackLink.style.display = 'none';
+                        // No song currently playing or Last.fm not linked, keep section hidden
+                        lastfmNowPlayingSection.style.display = 'none';
                     } else {
                         console.error('Error fetching Last.fm song:', await lastfmResponse.text());
-                        lastfmNowPlayingSection.style.display = 'block';
-                        lastfmTrackInfo.textContent = 'Error loading Last.fm song.';
-                        lastfmAlbumArt.style.display = 'none';
-                        lastfmTrackLink.style.display = 'none';
+                        // Error, keep section hidden
+                        lastfmNowPlayingSection.style.display = 'none';
                     }
                 } catch (error) {
                     console.error('Network error fetching Last.fm song:', error);
