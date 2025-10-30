@@ -148,3 +148,42 @@ body {
         box-sizing: border-box;
     }
 }
+
+/* Last.fm Now Playing Styles */
+#lastfm-now-playing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+#lastfm-album-art {
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid var(--profile-border-color, #01edf0);
+}
+
+#lastfm-track-info {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--profile-text-color);
+    text-align: center;
+}
+
+#lastfm-track-link {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: var(--accent-color, #333);
+    color: inherit;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#lastfm-track-link:hover {
+    background-color: var(--button-hover-color, #444);
+    transform: translateY(-2px);
+}

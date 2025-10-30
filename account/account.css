@@ -259,3 +259,14 @@ body {
         width: 100%;
     }
 }
+
+#lastfm-status {
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    color: var(--profile-text-color);
+}
+
+#lastfm-message {
+    margin-top: 10px;
+    font-size: 0.9rem;
+}

@@ -42,6 +42,13 @@
                     <input type="file" id="pfp-input" class="pfp-input-field" accept="image/*">
                     <button class="btn pfp-btn" onclick="changePfp()">Change PFP</button>
                 </div>
+                <div class="form-group">
+                    <h3>Last.fm Integration</h3>
+                    <p id="lastfm-status">Not linked.</p>
+                    <button class="btn" id="link-lastfm-btn" style="display: none;">Link Last.fm</button>
+                    <button class="btn" id="unlink-lastfm-btn" style="display: none; background-color: #d9534f; border-color: #d43f3a;">Unlink Last.fm</button>
+                    <p id="lastfm-message"></p>
+                </div>
                 <div class="form-group" style="margin-top: 30px; border-top: 2px solid #d9534f; padding-top: 20px;">
                     <label style="color: #d9534f; font-weight: bold;">Danger Zone</label>
                     <button class="btn" style="background-color: #d9534f; border-color: #d43f3a;" onclick="deleteAccount()">Delete My Account</button>
@@ -303,6 +310,69 @@
                         bgTypeColor.checked = true;
                     }
                     toggleBackgroundType(); // Apply initial display state
+
+                    // Last.fm Integration Logic
+                    const LASTFM_API_KEY_PUBLIC = "c0b5baee33a5182668424f7063155206";
+                    const NETLIFY_LASTFM_CALLBACK_URL = window.location.origin + "/.netlify/functions/lastfm-callback";
+
+                    const lastfmStatusEl = document.getElementById('lastfm-status');
+                    const linkLastfmBtn = document.getElementById('link-lastfm-btn');
+                    const unlinkLastfmBtn = document.getElementById('unlink-lastfm-btn');
+                    const lastfmMessageEl = document.getElementById('lastfm-message');
+
+                    async function checkLastfmLinkStatus() {
+                        const lastfmRef = ref(db, `users/${user.uid}/lastfm`);
+                        const lastfmSnapshot = await get(lastfmRef);
+                        if (lastfmSnapshot.exists()) {
+                            const lastfmData = lastfmSnapshot.val();
+                            lastfmStatusEl.textContent = `Linked to Last.fm as: ${lastfmData.username}`;
+                            linkLastfmBtn.style.display = 'none';
+                            unlinkLastfmBtn.style.display = 'inline-block';
+                        } else {
+                            lastfmStatusEl.textContent = 'Not linked.';
+                            linkLastfmBtn.style.display = 'inline-block';
+                            unlinkLastfmBtn.style.display = 'none';
+                        }
+                    }
+
+                    linkLastfmBtn.addEventListener('click', () => {
+                        const lastfmAuthUrl = `http://www.last.fm/api/auth/?api_key=${LASTFM_API_KEY_PUBLIC}&cb=${NETLIFY_LASTFM_CALLBACK_URL}?userId=${user.uid}`;
+                        window.location.href = lastfmAuthUrl;
+                    });
+
+                    unlinkLastfmBtn.addEventListener('click', async () => {
+                        if (confirm('Are you sure you want to unlink your Last.fm account?')) {
+                            try {
+                                const lastfmRef = ref(db, `users/${user.uid}/lastfm`);
+                                await remove(lastfmRef);
+                                lastfmMessageEl.textContent = 'Last.fm account unlinked successfully!';
+                                lastfmMessageEl.style.color = 'green';
+                                checkLastfmLinkStatus();
+                            } catch (error) {
+                                console.error('Error unlinking Last.fm:', error);
+                                lastfmMessageEl.textContent = `Error unlinking Last.fm: ${error.message}`;
+                                lastfmMessageEl.style.color = 'red';
+                            }
+                        }
+                    });
+
+                    // Check for Last.fm callback success/error
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.has('lastfm_linked')) {
+                        if (urlParams.get('lastfm_linked') === 'success') {
+                            lastfmMessageEl.textContent = 'Last.fm account linked successfully!';
+                            lastfmMessageEl.style.color = 'green';
+                        } else if (urlParams.get('lastfm_linked') === 'error') {
+                            lastfmMessageEl.textContent = 'Failed to link Last.fm account.';
+                            lastfmMessageEl.style.color = 'red';
+                        }
+                        // Clean up URL to prevent re-showing message on refresh
+                        urlParams.delete('lastfm_linked');
+                        const newUrl = window.location.pathname + urlParams.toString();
+                        window.history.replaceState({}, document.title, newUrl);
+                    }
+
+                    checkLastfmLinkStatus();
                 }
             } else {
                 window.location.href = "login.html";
