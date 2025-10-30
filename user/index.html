@@ -131,18 +131,8 @@
                     document.body.style.setProperty('--profile-border-color', data.profile.profileBorderColor);
                 }
 
-                const profileViewsRef = ref(db, `users/${userId}/profile/profileViews`);
-                let currentViews = ((await get(profileViewsRef)).val() || 0);
-
-                if (currentUser) {
-                    try {
-                        await set(profileViewsRef, currentViews + 1);
-                        currentViews++;
-                    } catch (e) {
-                        console.warn("Could not increment profile views.", e);
-                    }
-                }
-                document.getElementById('profile-views').textContent = `Profile Views: ${currentViews}`;
+                // Profile view counting disabled for diagnostics
+                document.getElementById('profile-views').textContent = 'Profile Views: --';
 
                 socialsEl.innerHTML = '';
                 let hasSocialLinks = false;
