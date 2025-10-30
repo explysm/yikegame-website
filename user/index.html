@@ -119,12 +119,8 @@
                         profileContainer.style.color = data.profile.profileTextColor;
                     }
 
-                    if (data.profile?.accentColor) {
-                        document.body.style.setProperty('--accent-color', data.profile.accentColor);
-                    }
-                    if (data.profile?.buttonHoverColor) {
-                        document.body.style.setProperty('--button-hover-color', data.profile.buttonHoverColor);
-                    }
+                    document.body.style.setProperty('--accent-color', data.profile?.accentColor || '#333333');
+                    document.body.style.setProperty('--button-hover-color', data.profile?.buttonHoverColor || '#444444');
                     if (data.profile?.profileBackgroundType === 'image' && data.profile?.profileBackgroundImageUrl) {
                         document.body.style.backgroundImage = `url(${data.profile.profileBackgroundImageUrl})`;
                         document.body.style.backgroundSize = 'cover';

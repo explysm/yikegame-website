@@ -279,13 +279,14 @@
                     if (userData.profile.customSocials) {
                         displayCustomSocialLinks(userData.profile.customSocials);
                     }
-                    if (userData.profile.accentColor) {
-                        document.getElementById('accent-color').value = userData.profile.accentColor;
-                    }
-                    if (userData.profile.buttonHoverColor) {
-                        document.getElementById('button-hover-color').value = userData.profile.buttonHoverColor;
-                    }
-                    if (userData.profile.profileBackgroundColor) {
+                                    if (userData.profile.accentColor) {
+                                        document.getElementById('accent-color').value = userData.profile.accentColor;
+                                        document.body.style.setProperty('--accent-color', userData.profile.accentColor);
+                                    }
+                                    if (userData.profile.buttonHoverColor) {
+                                        document.getElementById('button-hover-color').value = userData.profile.buttonHoverColor;
+                                        document.body.style.setProperty('--button-hover-color', userData.profile.buttonHoverColor);
+                                    }                    if (userData.profile.profileBackgroundColor) {
                         document.getElementById('profile-background-color').value = userData.profile.profileBackgroundColor;
                     }
                     if (userData.profile.profileTextColor) {
