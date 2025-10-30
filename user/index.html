@@ -101,7 +101,11 @@
                 displayNameEl.textContent = data.displayName || 'Unnamed User';
                 pfpEl.src = data.photoURL || 'https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png';
                 bioEl.textContent = data.profile?.description || 'No bio yet.';
-                joinDateEl.textContent = `Joined ${new Date(data.creationTime).toLocaleDateString()}`;
+                if (data.creationTime) {
+                    joinDateEl.textContent = `Joined ${new Date(data.creationTime).toLocaleDateString()}`;
+                } else {
+                    joinDateEl.textContent = 'Join date not available';
+                }
 
                 if (data.profile?.profilePanelColor) {
                     profileContainer.style.backgroundColor = data.profile.profilePanelColor;
@@ -131,8 +135,18 @@
                     document.body.style.setProperty('--profile-border-color', data.profile.profileBorderColor);
                 }
 
-                // Profile view counting disabled for diagnostics
-                document.getElementById('profile-views').textContent = 'Profile Views: --';
+                const profileViewsRef = ref(db, `users/${userId}/profile/profileViews`);
+                let currentViews = ((await get(profileViewsRef)).val() || 0);
+
+                if (currentUser) {
+                    try {
+                        await set(profileViewsRef, currentViews + 1);
+                        currentViews++;
+                    } catch (e) {
+                        console.warn("Could not increment profile views.", e);
+                    }
+                }
+                document.getElementById('profile-views').textContent = `Profile Views: ${currentViews}`;
 
                 socialsEl.innerHTML = '';
                 let hasSocialLinks = false;
