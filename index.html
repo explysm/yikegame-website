@@ -93,7 +93,7 @@ details pre {
 }
 </style>
 
-<script type="module">
+<script type="module" data-cfasync="false">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { getDatabase, ref, get, query, orderByChild, startAt, endAt } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
@@ -391,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <div class="divider"></div>
-    <script type="module">
+    <script type="module" data-cfasync="false">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
         import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
