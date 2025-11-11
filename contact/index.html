@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - YikeGames</title>
+    <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body>
+    <header>
+        <h1 class="glitch-text" data-text="Contact Us">Contact Us</h1>
+        <p class="subtitle">Get in touch with YikeGames and Explysm</p>
+    </header>
+
+    <div class="contact-container">
+            <div class="info-box">
+                <h2>Contact YikeGames</h2>
+                <p>For general inquiries, partnerships, or support related to YikeGames, please reach out to us:</p>
+                <p>Email: <a href="mailto:hello@yike.games" class="web-link">hello@yike.games</a></p>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="info-box">
+                <h2>Contact Explysm (Owner of YikeGames)</h2>
+                <p>If you need to contact Explysm directly, you can do so via:</p>
+                <p>Email: <a href="mailto:explysm@yike.games" class="web-link">explysm@yike.games</a></p>
+                <p>Discord User: .x.v.c.</p>
+                <p>Join our Discord server: <a href="/discord" class="web-link">yike.games/discord</a></p>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="info-box">
+                <h2>Send us a message</h2>
+                <form class="contact-form" id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" class="input-field" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" class="input-field" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject:</label>
+                        <input type="text" id="subject" name="subject" class="input-field" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message:</label>
+                        <textarea id="message" name="message" class="input-field" required></textarea>
+                    </div>
+                    <button type="submit" class="btn" id="submitBtn">Send Message</button>
+                </form>
+                <div id="formFeedback" style="margin-top: 15px; font-size: 1rem; color: #01edf0;"></div>
+            </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const contactForm = document.getElementById('contactForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const formFeedback = document.getElementById('formFeedback');
+            const webhookUrl = 'https://discord.com/api/webhooks/1437660356200763503/GtN4Igk1Ud5WVognxV1rnYmoJ3LS0fFm5ZJdYNWbetN2rzwfWM34Q6RA7n07wWPiQApO';
+
+            contactForm.addEventListener('submit', async (e) => {
+                e.preventDefault(); // Prevent default form submission
+
+                submitBtn.disabled = true;
+                formFeedback.textContent = 'Sending message...';
+                formFeedback.style.color = '#01edf0';
+
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const subject = document.getElementById('subject').value;
+                const message = document.getElementById('message').value;
+
+                const discordMessageContent = `**Subject:** ${subject}\n**Message:** ${message}\n**From:** ${name} <${email}>`;
+
+                const payload = {
+                    username: email, // User's email as the webhook username
+                    content: discordMessageContent
+                };
+
+                try {
+                    const response = await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload),
+                    });
+
+                    if (response.ok) {
+                        formFeedback.textContent = 'Message sent successfully! We will get back to you soon.';
+                        formFeedback.style.color = '#4CAF50'; // Green for success
+                        contactForm.reset(); // Clear the form
+                    } else {
+                        const errorData = await response.json();
+                        formFeedback.textContent = `Failed to send message. Error: ${errorData.message || response.statusText}`;
+                        formFeedback.style.color = '#ff007f'; // Red for error
+                    }
+                } catch (error) {
+                    formFeedback.textContent = `An unexpected error occurred: ${error.message}`;
+                    formFeedback.style.color = '#ff007f'; // Red for error
+                    console.error('Error sending webhook:', error);
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

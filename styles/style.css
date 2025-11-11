@@ -1338,6 +1338,100 @@ body.chat-page, body.forums-page {
     }
 }
 
+/* --- Contact Page Styles --- */
+.contact-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 800px;
+    width: 90%;
+    gap: 30px; /* Increased space between sections */
+    padding: 20px;
+}
+
+/* --- Info Box Styles (for Contact Page) --- */
+.info-box {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #01edf0;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5), inset 0 0 5px rgba(1, 237, 240, 0.5);
+    padding: 20px;
+    border-radius: 0;
+    width: 100%;
+    text-align: left; /* Ensure text is left-aligned */
+}
+
+.info-box p {
+    margin-bottom: 10px; /* Add spacing between paragraphs */
+}
+
+.info-box p:last-child {
+    margin-bottom: 0;
+}
+
+/* --- Contact Form Styles --- */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 600px; /* Limit width for better readability */
+    margin-top: 20px;
+}
+
+.contact-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.contact-form label {
+    font-size: 1rem;
+    color: #01edf0;
+    text-shadow: 0 0 5px #01edf0;
+}
+
+.contact-form .input-field {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+}
+
+.contact-form textarea.input-field {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.contact-form .btn {
+    align-self: flex-start; /* Align button to the left */
+    padding: 12px 40px;
+    font-size: 1.2rem;
+}
+
+/* --- Footer Styles --- */
+footer {
+    margin-top: 50px;
+    padding: 20px;
+    text-align: center;
+    color: #01edf0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+footer p {
+    margin-bottom: 5px;
+}
+
+footer .footer-link {
+    color: #01edf0;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+footer .footer-link:hover {
+    color: #fff;
+    text-shadow: 0 0 10px #01edf0;
+}
+
 /* --- Search Icon and Modal Styles --- */
 .search-icon-btn {
     position: fixed;
