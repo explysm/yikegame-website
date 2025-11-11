@@ -81,10 +81,11 @@
 
 <script type="module">
     // Import necessary Firebase functions
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getDatabase, ref, push, onValue, get, remove, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js"; 
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAuth, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import { getDatabase, ref, push, onValue, get, remove, update } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js"; 
 
+    document.addEventListener('DOMContentLoaded', () => {
     // 🛑 --- HARDCODED FIREBASE & CLOUDINARY CONFIGS (REPLACE THESE) --- 🛑
     const firebaseConfig = {
         apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
@@ -289,7 +290,7 @@
     }
 
     // --- Firebase & App Initialization ---
-    window.addEventListener('load', async () => {
+    (async () => {
         try {
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
@@ -356,7 +357,7 @@
             loadingSpinner.classList.add('hidden');
             gamesGrid.innerHTML = '<p class="full-span" style="text-align: center; color: #ff007f;">SYSTEM FAILURE. Cannot connect to Firebase.</p>';
         }
-    });
+    })();
 
     // --- Event Delegation (FIX: Handles Edit/Delete clicks on all dynamic cards) ---
     gamesGrid.addEventListener('click', (e) => {
@@ -500,6 +501,7 @@
         }
 
     });
+});
 </script>
 </body>
 </html>

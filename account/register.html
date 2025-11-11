@@ -134,6 +134,7 @@
   import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
   import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
+  document.addEventListener('DOMContentLoaded', () => {
   const firebaseConfig = {
     apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
     authDomain: "yikegames-website.firebaseapp.com",
@@ -185,21 +186,19 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const generateBtn = document.getElementById('generate-btn');
-    const emailInput = document.getElementById('email');
-    if (generateBtn && emailInput) {
-      generateBtn.addEventListener('click', () => {
-        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        let result = '';
-        const length = 20;
-        for (let i = 0; i < length; i++) {
-          result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        emailInput.value = result + '@gmail.com';
-      });
-    }
-  });
+  const generateBtn = document.getElementById('generate-btn');
+  const emailInput = document.getElementById('email');
+  if (generateBtn && emailInput) {
+    generateBtn.addEventListener('click', () => {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let result = '';
+      const length = 20;
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      emailInput.value = result + '@gmail.com';
+    });
+  }
   
   document.body.classList.add('fade-enter');
   setTimeout(() => {
@@ -217,6 +216,7 @@
       }
     });
   });
+});
 </script>
 </body>
 </html>
