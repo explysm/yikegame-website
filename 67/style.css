@@ -1,0 +1,12 @@
+html, body {
+  height: 100%;
+  margin: 0; /* Remove default body margin */
+  padding: 0; /* Remove default body padding */
+}
+
+img {
+  width: 100vw; /* 100% of viewport width */
+  height: 100vh; /* 100% of viewport height */
+  object-fit: cover; /* Image will cover the entire space, cropping if necessary */
+  display: block; /* Remove extra space below the image */
+}
