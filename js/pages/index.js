@@ -47,7 +47,7 @@ onAuthStateChanged(auth, user => {
     const loginBtnButton = loginBtnAnchor.querySelector('button');
     if (user && loginBtnButton) {
         loginBtnButton.textContent = "Account";
-        loginBtnAnchor.href = "account/account/";
+        loginBtnAnchor.href = "account/";
     }
 });
 
