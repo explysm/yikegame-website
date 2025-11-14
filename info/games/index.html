@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Gallery</title>
+    <link rel="stylesheet" href="../styles/style.css"> 
+</head>
+<body>
+
+    <div class="app-container">
+
+        <header>
+            <h1 data-text="Games" class="glitch-text">Games</h1>
+            <nav>
+                <a href="../index.html" class="btn nav-btn">Home</a>
+
+            </nav>
+        </header>
+
+        <div id="notification-container" class="notification-container"></div>
+
+        <main>
+            <div id="developer-controls" class="hidden" style="margin-bottom: 30px;">
+                <button id="add-game-button" class="btn">
+                    Post a New Game
+                </button>
+            </div>
+            
+            <div id="games-grid" class="games-grid">
+                <div class="full-span loading-message" id="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading games...</p>
+                </div>
+            </div>
+        </main>
+
+        <div id="add-game-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Post New Game</h2>
+                    <button id="close-modal-button" class="close-modal-btn">X</button>
+                </div>
+                <form id="game-form" class="form-field-group">
+                    <input type="text" id="game-title" placeholder="Game Title" required class="input-field">
+                    <textarea id="game-description" placeholder="Description" required class="input-field"></textarea>
+                    <input type="file" id="game-cover-photo" accept="image/*" required>
+                    <input type="url" id="game-download-link" placeholder="Download Link (e.g., https://yoursite.com/game.zip)" required class="input-field">
+                    <div id="upload-status" class="upload-status"></div>
+                    <button type="submit" id="submit-button" class="submit-button">
+                        <span id="submit-text">Post Game</span>
+                        <div id="submit-spinner" class="spinner hidden" style="width: 20px; height: 20px; border-width: 3px; margin: 0 auto;"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="edit-game-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Edit Game</h2>
+                    <button id="close-edit-modal-button" class="close-modal-btn">X</button>
+                </div>
+                <form id="edit-game-form" class="form-field-group">
+                    <input type="hidden" id="edit-game-id"> 
+                    <input type="text" id="edit-game-title" placeholder="Game Title" required class="input-field">
+                    <textarea id="edit-game-description" placeholder="Description" required class="input-field"></textarea>
+                    <p>Change Cover Photo (Optional):</p>
+                    <input type="file" id="edit-game-cover-photo" accept="image/*">
+                    <input type="url" id="edit-game-download-link" placeholder="Download Link" required class="input-field">
+                    <div id="edit-upload-status" class="upload-status"></div>
+                    <button type="submit" id="edit-submit-button" class="submit-button">
+                        <span id="edit-submit-text">Save Changes</span>
+                        <div id="edit-submit-spinner" class="spinner hidden" style="width: 20px; height: 20px; border-width: 3px; margin: 0 auto;"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+<div id="footer-container"></div>
+<script type="module" src="../../js/pages/info-games.js"></script>
+<script type="module" src="../../js/components/footer.js"></script>
+</body>
+</html>

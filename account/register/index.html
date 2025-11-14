@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Register - YikeGames</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="../styles/style.css">
+<link rel="stylesheet" href="../../styles/style.css">
 
 <style>
   /* All your CSS is now inside this block for a single file solution */
@@ -111,7 +111,7 @@
   <input type="password" id="password" placeholder="Password" class="input-field">
   <button class="btn login-btn" onclick="registerUser()">Register</button>
   <p style="margin-top:10px;">Already have an account? 
-      <a href="login.html" style="color:#46a2b4; text-decoration:underline;">Login here</a>
+      <a href="../login/" style="color:#46a2b4; text-decoration:underline;">Login here</a>
   </p>
 </section>
 
@@ -127,7 +127,7 @@
     </div>
 </div>
 
-<a href="../index.html" class="btn">Back</button></a>
+<a href="../../index.html" class="btn">Back</a>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
@@ -180,7 +180,7 @@
       await set(ref(db, 'usernames/' + username), user.uid);
 
       alert(`Account created for ${username}!`);
-      window.location.href = "login.html";
+      window.location.href = "../login/";
     } catch (error) {
       alert(error.message);
     }
@@ -216,7 +216,15 @@
       }
     });
   });
-});
+  });
+</script>
+<div id="footer-container"></div>
+<script>
+  fetch('../../components/footer.html')
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById('footer-container').innerHTML = html;
+    });
 </script>
 </body>
 </html>

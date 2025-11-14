@@ -1,284 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>User Profile</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../styles/style.css">
-    <link rel="stylesheet" href="profile.css">
+<meta charset="UTF-8">
+<title>Main Screen</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="styles/style.css">
+
+<style>
+/* --- New CSS for the Commit Toggle --- */
+.commit-toggle-btn {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.commit-toggle-btn:hover {
+    background-color: #45a049;
+}
+
+.commit-toggle-btn.active {
+    background-color: #007bff; /* Blue for active state */
+}
+
+.commit-list-container {
+    display: none; /* Default state: hidden */
+}
+
+.commit-list-container.active {
+    display: block; /* Show active container */
+}
+/* --- END New CSS --- */
+
+/* --- Commit Details/Summary Styles --- */
+details {
+  margin-bottom: 10px;
+}
+summary {
+  cursor: pointer;
+  outline: none;
+  color: #01edf0;
+}
+summary:hover {
+  text-decoration: underline;
+}
+details[open] summary {
+  margin-bottom: 5px;
+}
+details pre {
+  background-color: rgba(0,0,0,0.2);
+  padding: 10px;
+  border-left: 2px solid #01edf0;
+  margin-top: 5px;
+  color: #fff;
+}
+.search-results-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+.search-result-item a {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    text-decoration: none;
+    color: #01edf0;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+.search-result-item a:hover {
+    background-color: rgba(1, 237, 240, 0.1);
+}
+.search-result-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+}
+.search-result-item span {
+    font-size: 1.1rem;
+}
+</style>
+
+<script type="module" src="js/pages/index.js" data-cfasync="false"></script>
+<script type="module" src="js/pages/index-notifications.js" data-cfasync="false"></script>
 </head>
 <body>
-    <a href="../index.html" class="back-arrow">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-    </a>
+    <div id="search-icon" class="search-icon-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    </div>
 
-    <main class="profile-container">
-        <div class="profile-header">
-            <img id="pfp-display" 
-                 src="../src/pfp/default-pfp.png" 
-                 alt="Profile Picture" 
-                 class="pfp-image"
-                 onerror="this.src='../src/pfp/default-pfp.png'">
-            <h1 id="user-display-name">Loading...</h1>
-            <div id="friend-status-container"></div>
-            <p id="user-join-date">Loading...</p>
-            <p id="profile-views">Loading...</p>
+    <div id="search-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Search for a User</h2>
+                <button id="close-search-modal" class="close-modal-btn">X</button>
+            </div>
+            <form id="search-form" class="form-field-group">
+                <input type="text" id="search-username" placeholder="Enter username" required class="input-field">
+                <button type="submit" class="btn">Search</button>
+            </form>
+            <p id="search-status"></p>
         </div>
-        <div class="profile-body">
-            <section class="profile-section" id="lastfm-now-playing-section" style="display: none;">
-                <h2>Currently Listening</h2>
-                <div id="lastfm-now-playing">
-                    <img id="lastfm-album-art" src="" alt="Album Art" style="display: none;">
-                    <p id="lastfm-track-info"></p>
-                    <a id="lastfm-track-link" href="#" target="_blank" rel="noopener noreferrer" style="display: none;">View on Last.fm</a>
+    </div>
+
+    <div id="notification-container" class="hidden"></div>
+
+    <header>
+        <h1>Welcome to the home page!</h1>
+        <p class="subtitle">Go to any section using the buttons below</p>
+    </header>
+
+    <div class="main-content">
+        <div class="left-sidebar">
+
+            <section class="web">
+                <a href="https://yike.games">yike.games</a>
+                <a href="https://yikegames.itch.io">yikegames.itch.io</a>
+                <a href="https://github.com/explysm">github.com/explysm</a>
+            </section>
+            
+            <div class="divider"></div>
+
+            <section class="social-links">
+                <a href="https://x.com/AsnCEe">Twitter</a>
+                <a href="https://discord.gg/42vm7wGpVE">Discord</a>
+                <a href="67/index.html">6 7</a>
+            </section>
+        </div>
+
+        <div class="center-column">
+            <section id="update-notification" class="warning" style="display:none; margin-bottom: 15px;"></section>
+
+            <section class="login-container">
+                <a id="login-register-btn" href="account/login/"><button class="btn login-btn">Login / Register</button></a>
+            </section>
+
+            <nav class="main-nav">
+                <a href="info/games/" class="nav-btn">Games</a>
+                <a href="info/aboutme/" class="nav-btn">About Me</a>
+                <a href="community/chat/" class="nav-btn">Social</a>
+                <a href="community/devlog/" class="nav-btn">Dev Log</a>
+            </nav>
+        </div>
+
+        <div class="right-sidebar">
+            <section class="updates">
+                <h2>Latest Commits</h2>
+                <div>
+                    <button id="toggle-app-commits" class="commit-toggle-btn active">App</button>
+                    <button id="toggle-game-commits" class="commit-toggle-btn">Games</button>
+                </div>
+                
+                <div id="app-commits-container" class="commit-list-container active">
+                    <ul id="commit-list"></ul>
+                </div>
+                  
+                <div id="game-commits-container" class="commit-list-container">
+                    <ul id="commit-list-games"></ul>
                 </div>
             </section>
-            <section class="profile-section">
-                <h2>About Me</h2>
-                <p id="user-bio">Loading...</p>
-            </section>
-            <section class="profile-section">
-                <h2>Socials</h2>
-                <div id="user-socials" class="social-links-container"></div>
-            </section>
         </div>
-    </main>
+    </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-        import { getDatabase, ref, get, set, remove, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    <div class="divider"></div>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const firebaseConfig = {
-                apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
-                authDomain: "yikegames-website.firebaseapp.com",
-                projectId: "yikegames-website",
-                databaseURL: "https://yikegames-website-default-rtdb.firebaseio.com/",
-                storageBucket: "yikegames-website.firebasestorage.app",
-                messagingSenderId: "1086586566551",
-                appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
-                measurementId: "G-FXH0D07D86"
-            };
+    <footer>
+        <p>&copy; 2025 YikeGames. All rights reserved.</p>
+        <p><a href="contact/" class="footer-link">Contact Us</a></p>
+    </footer>
 
-            const app = initializeApp(firebaseConfig);
-            const db = getDatabase(app);
-            const auth = getAuth(app);
-
-            let currentUser = null;
-
-            onAuthStateChanged(auth, (user) => {
-                currentUser = user;
-                loadUserProfile();
-            });
-
-            async function loadUserProfile() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const username = urlParams.get('u');
-
-                const displayNameEl = document.getElementById('user-display-name');
-                const pfpEl = document.getElementById('pfp-display');
-                const bioEl = document.getElementById('user-bio');
-                const socialsEl = document.getElementById('user-socials');
-                const joinDateEl = document.getElementById('user-join-date');
-                const friendStatusContainer = document.getElementById('friend-status-container');
-                const profileContainer = document.querySelector('.profile-container');
-
-                if (!username) {
-                    displayNameEl.textContent = 'User not specified';
-                    return;
-                }
-
-                try {
-                    const usersRef = ref(db, 'users');
-                    const userQuery = query(usersRef, orderByChild('displayName'), equalTo(username));
-                    const snapshot = await get(userQuery);
-
-                    if (!snapshot.exists()) {
-                        displayNameEl.textContent = 'User not found';
-                        return;
-                    }
-
-                    const userData = snapshot.val();
-                    const userId = Object.keys(userData)[0];
-                    const data = userData[userId];
-
-                    displayNameEl.textContent = data.displayName || 'Unnamed User';
-                    pfpEl.src = data.photoURL || 'https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png';
-                    bioEl.textContent = data.profile?.description || 'No bio yet.';
-                    if (data.creationTime) {
-                        joinDateEl.textContent = `Joined ${new Date(data.creationTime).toLocaleDateString()}`;
-                    } else {
-                        joinDateEl.textContent = 'Join date not available';
-                    }
-
-                    if (data.profile?.profilePanelColor) {
-                        profileContainer.style.backgroundColor = data.profile.profilePanelColor;
-                    }
-                    if (data.profile?.profileTextColor) {
-                        profileContainer.style.color = data.profile.profileTextColor;
-                    }
-
-                    document.body.style.setProperty('--accent-color', data.profile?.accentColor || '#333333');
-                    document.body.style.setProperty('--button-hover-color', data.profile?.buttonHoverColor || '#444444');
-                    if (data.profile?.profileBackgroundType === 'image' && data.profile?.profileBackgroundImageUrl) {
-                        document.body.style.backgroundImage = `url(${data.profile.profileBackgroundImageUrl})`;
-                        document.body.style.backgroundSize = 'cover';
-                        document.body.style.backgroundAttachment = 'fixed';
-                        document.body.style.backgroundPosition = 'center';
-                        document.body.style.backgroundColor = 'transparent'; // Ensure color doesn't show through
-                    } else if (data.profile?.profileBackgroundColor) {
-                        document.body.style.backgroundColor = data.profile.profileBackgroundColor;
-                        document.body.style.backgroundImage = 'none';
-                    }
-
-                    if (data.profile?.profileBorderColor) {
-                        document.body.style.setProperty('--profile-border-color', data.profile.profileBorderColor);
-                    }
-
-                    const profileViewsRef = ref(db, `users/${userId}/profile/profileViews`);
-                    let currentViews = ((await get(profileViewsRef)).val() || 0);
-
-                    if (currentUser) {
-                        try {
-                            await set(profileViewsRef, currentViews + 1);
-                            currentViews++;
-                        } catch (e) {
-                            console.warn("Could not increment profile views.", e);
-                        }
-                    }
-                    document.getElementById('profile-views').textContent = `Profile Views: ${currentViews}`;
-
-                    socialsEl.innerHTML = '';
-                    let hasSocialLinks = false;
-
-                    // Display existing social links (Twitter, GitHub, etc.)
-                    if (data.profile?.socials && Object.keys(data.profile.socials).length > 0) {
-                        for (const [platform, handle] of Object.entries(data.profile.socials)) {
-                            if (!handle) continue;
-                            const link = document.createElement('a');
-                            link.href = `https://${platform}.com/${handle}`;
-                            link.textContent = platform.charAt(0).toUpperCase() + platform.slice(1);
-                            link.target = '_blank';
-                            link.rel = 'noopener noreferrer';
-                            socialsEl.appendChild(link);
-                            hasSocialLinks = true;
-                        }
-                    }
-
-                    // Display custom social links
-                    if (data.profile?.customSocials && Object.keys(data.profile.customSocials).length > 0) {
-                        Object.values(data.profile.customSocials).forEach(linkData => {
-                            if (!linkData.url || !linkData.displayName) return;
-                            const link = document.createElement('a');
-                            link.href = linkData.url;
-                            link.textContent = linkData.displayName;
-                            link.target = '_blank';
-                            link.rel = 'noopener noreferrer';
-                            socialsEl.appendChild(link);
-                            hasSocialLinks = true;
-                        });
-                    }
-
-                    if (!hasSocialLinks) {
-                        socialsEl.textContent = 'No social links added yet.';
-                    }
-
-                    // Last.fm Now Playing Logic
-                    const lastfmNowPlayingSection = document.getElementById('lastfm-now-playing-section');
-                    const lastfmAlbumArt = document.getElementById('lastfm-album-art');
-                    const lastfmTrackInfo = document.getElementById('lastfm-track-info');
-                    const lastfmTrackLink = document.getElementById('lastfm-track-link');
-
-                    try {
-                        const lastfmResponse = await fetch(`/.netlify/functions/lastfm-song?userId=${userId}`);
-                        if (lastfmResponse.ok) {
-                            const track = await lastfmResponse.json();
-                            // Check if the track is actually playing before displaying the section
-                            if (track['@attr'] && track['@attr'].nowplaying === 'true') {
-                                lastfmNowPlayingSection.style.display = 'block';
-                                lastfmTrackInfo.textContent = `${track.artist['#text']} - ${track.name}`;
-                                lastfmTrackLink.href = track.url;
-                                lastfmTrackLink.style.display = 'inline-block';
-
-                                const albumArt = track.image.find(img => img.size === 'large') || track.image[0];
-                                if (albumArt && albumArt['#text']) {
-                                    lastfmAlbumArt.src = albumArt['#text'];
-                                    lastfmAlbumArt.style.display = 'block';
-                                } else {
-                                    lastfmAlbumArt.style.display = 'none';
-                                }
-                            } else {
-                                // No song currently playing, keep section hidden
-                                lastfmNowPlayingSection.style.display = 'none';
-                            }
-                        } else if (lastfmResponse.status === 404) {
-                            // No song currently playing or Last.fm not linked, keep section hidden
-                            lastfmNowPlayingSection.style.display = 'none';
-                        } else {
-                            console.error('Error fetching Last.fm song:', await lastfmResponse.text());
-                            // Error, keep section hidden
-                            lastfmNowPlayingSection.style.display = 'none';
-                        }
-                    } catch (error) {
-                        console.error('Network error fetching Last.fm song:', error);
-                        lastfmNowPlayingSection.style.display = 'block';
-                        lastfmTrackInfo.textContent = 'Error loading Last.fm song.';
-                        lastfmAlbumArt.style.display = 'none';
-                        lastfmTrackLink.style.display = 'none';
-                    }
-
-                    // Friend status logic
-                    friendStatusContainer.innerHTML = '';
-                    if (currentUser && currentUser.uid !== userId) {
-                        const currentUserRef = ref(db, `users/${currentUser.uid}`);
-                        const currentUserSnapshot = await get(currentUserRef);
-                        const currentUserData = currentUserSnapshot.val();
-
-                        if (currentUserData.friends && currentUserData.friends[userId]) {
-                            friendStatusContainer.innerHTML = '<p>Friends</p>';
-                        } else if (data.profile?.friendRequests && data.profile.friendRequests[currentUser.uid]) {
-                            friendStatusContainer.innerHTML = '<p>Friend Request Sent</p>';
-                        } else if (currentUserData.profile?.friendRequests && currentUserData.profile.friendRequests[userId]) {
-                            friendStatusContainer.innerHTML = '<button id="accept-friend-btn" class="btn">Accept Friend Request</button>';
-                            document.getElementById('accept-friend-btn').addEventListener('click', () => acceptFriendRequest(userId));
-                        } else {
-                            friendStatusContainer.innerHTML = '<button id="add-friend-btn" class="btn">Add Friend</button>';
-                            document.getElementById('add-friend-btn').addEventListener('click', () => addFriend(userId));
-                        }
-                    }
-
-                } catch (error) {
-                    console.error("Failed to load user profile:", error);
-                }
-            }
-
-            async function addFriend(profileUserId) {
-                if (!currentUser) return alert('You must be logged in to add friends.');
-
-                const friendRequestRef = ref(db, `users/${profileUserId}/profile/friendRequests/${currentUser.uid}`);
-                await set(friendRequestRef, true);
-            loadUserProfile(); // Refresh the profile to show the updated status
-            }
-
-            async function acceptFriendRequest(profileUserId) {
-                if (!currentUser) return alert('You must be logged in to accept friend requests.');
-
-                // Remove friend request from both users
-                const currentUserFriendRequestRef = ref(db, `users/${currentUser.uid}/profile/friendRequests/${profileUserId}`);
-                const profileUserFriendRequestRef = ref(db, `users/${profileUserId}/profile/friendRequests/${currentUser.uid}`);
-                await remove(currentUserFriendRequestRef);
-                await remove(profileUserFriendRequestRef);
-
-                // Add to friends list for both users
-                const currentUserFriendRef = ref(db, `users/${currentUser.uid}/friends/${profileUserId}`);
-                const profileUserFriendRef = ref(db, `users/${profileUserId}/friends/${currentUser.uid}`);
-                await set(currentUserFriendRef, true);
-                await set(profileUserFriendRef, true);
-
-                loadUserProfile(); // Refresh the profile to show the updated status
-            }
-        });
-    </script>
+<div id="footer-container"></div>
+<script type="module" src="js/components/footer.js"></script>
 </body>
 </html>
+

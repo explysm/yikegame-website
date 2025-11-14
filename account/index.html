@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Account</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../styles/style.css">
+    <link rel="stylesheet" href="../../styles/components/account.css">
+</head>
+<body>
+    <a href="../../index.html" class="back-arrow">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    </a>
+    <div class="account-container">
+        <aside class="sidebar">
+            <div class="user-card">
+                <img id="pfp-display" src="https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png" alt="Profile Picture" class="pfp-image">
+                <h2 id="user-display-name"></h2>
+                <p>Joined <span id="user-join-date"></span></p>
+                <a id="view-profile-btn" href="#" class="btn">View Profile</a>
+            </div>
+            <nav class="account-nav">
+                <a href="#" class="nav-item active" data-tab="account">Account Settings</a>
+                <a href="#" class="nav-item" data-tab="profile">Edit Profile</a>
+                <a href="#" class="nav-item" data-tab="socials">Social Links</a>
+                <a href="#" class="nav-item" data-tab="developer" id="developer-tab" style="display: none;">Developer</a>
+            </nav>
+            <div class="logout-btn-container">
+                <button class="btn" onclick="logout()">Log Out</button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="tab-content active" id="account-tab">
+                <h3>Account Settings</h3>
+                <div class="form-group">
+                    <label for="newUsername">Change Username</label>
+                    <input type="text" id="newUsername" placeholder="New Username" class="input-field">
+                    <button class="btn username-btn" onclick="changeUsername()">Change</button>
+                </div>
+                <div class="form-group">
+                    <label for="pfp-input">Change Profile Picture</label>
+                    <input type="file" id="pfp-input" class="pfp-input-field" accept="image/*">
+                    <button class="btn pfp-btn" onclick="changePfp()">Change PFP</button>
+                </div>
+                <div class="form-group">
+                    <h3>Last.fm Integration</h3>
+                    <p id="lastfm-status">Not linked.</p>
+                    <button class="btn" id="link-lastfm-btn" style="display: none;">Link Last.fm</button>
+                    <button class="btn" id="unlink-lastfm-btn" style="display: none; background-color: #d9534f; border-color: #d43f3a;">Unlink Last.fm</button>
+                    <p id="lastfm-message"></p>
+                </div>
+                <div class="form-group" style="margin-top: 30px; border-top: 2px solid #d9534f; padding-top: 20px;">
+                    <label style="color: #d9534f; font-weight: bold;">Danger Zone</label>
+                    <button class="btn" style="background-color: #d9534f; border-color: #d43f3a;" onclick="deleteAccount()">Delete My Account</button>
+                </div>
+            </div>
+            <div class="tab-content" id="profile-tab">
+                <h3>Edit Profile</h3>
+                <form id="edit-profile-form" class="edit-profile-form">
+                    <div class="form-group">
+                        <label for="bio">Your Bio</label>
+                        <textarea id="bio" class="input-field" placeholder="Tell us about yourself..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="accent-color">Accent Color</label>
+                        <input type="color" id="accent-color" class="input-field" value="#333333">
+                    </div>
+                    <div class="form-group">
+                        <label for="button-hover-color">Button Hover Color</label>
+                        <input type="color" id="button-hover-color" class="input-field" value="#444444">
+                    </div>
+                    <div class="form-group">
+                        <label>Profile Background Type</label>
+                        <div>
+                            <input type="radio" id="bg-type-color" name="background-type" value="color" checked>
+                            <label for="bg-type-color">Solid Color</label>
+                            <input type="radio" id="bg-type-image" name="background-type" value="image">
+                            <label for="bg-type-image">Image</label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="profile-background-color-group">
+                        <label for="profile-background-color">Profile Background Color</label>
+                        <input type="color" id="profile-background-color" class="input-field" value="#1e1e1e">
+                    </div>
+                    <div class="form-group" id="profile-background-image-group" style="display: none;">
+                        <label for="profile-background-image-input">Profile Background Image</label>
+                        <input type="file" id="profile-background-image-input" class="pfp-input-field" accept="image/*">
+                        <button type="button" class="btn" id="upload-background-image-btn">Upload Background Image</button>
+                        <p id="background-image-status"></p>
+                        <img id="profile-background-image-preview" src="" alt="Background Preview" style="max-width: 100%; height: auto; margin-top: 10px; display: none;">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-text-color">Profile Text Color</label>
+                        <input type="color" id="profile-text-color" class="input-field" value="#e0e0e0">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-panel-color">Profile Panel Color</label>
+                        <input type="color" id="profile-panel-color" class="input-field" value="#1e1e1e">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profile-border-color">Profile Border Color</label>
+                        <input type="color" id="profile-border-color" class="input-field" value="#01edf0">
+                    </div>
+                    <button type="submit" class="btn">Save Changes</button>
+                </form>
+            </div>
+            <div class="tab-content" id="socials-tab">
+                <h3>Social Links</h3>
+                <form id="socials-form" class="edit-profile-form">
+                    <div class="form-group">
+                        <label for="twitter">Twitter Handle</label>
+                        <input type="text" id="twitter" class="input-field" placeholder="Your Twitter username">
+                    </div>
+                    <div class="form-group">
+                        <label for="github">GitHub Handle</label>
+                        <input type="text" id="github" class="input-field" placeholder="Your GitHub username">
+                    </div>
+                    <hr style="margin: 20px 0; border-color: #01edf050;">
+                    <h3>Custom Social Links</h3>
+                    <div class="form-group">
+                        <label for="socialDisplayName">Display Name</label>
+                        <input type="text" id="socialDisplayName" class="input-field" placeholder="e.g., My Website">
+                    </div>
+                    <div class="form-group">
+                        <label for="socialUrl">URL</label>
+                        <input type="url" id="socialUrl" class="input-field" placeholder="https://example.com">
+                    </div>
+                    <button type="button" id="add-social-link-btn" class="btn">Add Custom Link</button>
+                    <div id="custom-social-links-list" class="social-links-container">
+                        <!-- Custom social links will be loaded here -->
+                    </div>
+                    <button type="submit" class="btn">Save Changes</button>
+                </form>
+            </div>
+            <div class="tab-content" id="developer-tab-content">
+                <h3>Developer Management</h3>
+                <div class="form-group">
+                    <label for="dev-email-input">User Email</label>
+                    <input type="email" id="dev-email-input" placeholder="Enter user's email" class="input-field">
+                </div>
+                <button id="toggle-dev-btn" class="btn username-btn">Toggle Developer Status</button>
+                <p id="dev-status-message"></p>
+                <button class="btn" onclick="openDevelopersModal()">View Developers</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="developers-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeDevelopersModal()">&times;</span>
+            <h2>Current Developers</h2>
+            <ul id="developers-list">
+                </ul>
+            <p id="dev-modal-status"></p>
+        </div>
+    </div>
+<div id="footer-container"></div>
+<script type="module" src="../js/pages/account-account.js"></script>
+<script type="module" src="../js/components/footer.js"></script>
+</body>
+</html>

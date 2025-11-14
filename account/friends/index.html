@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <title>My Friends</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../styles/style.css">
-    <link rel="stylesheet" href="account.css">
-    <link rel="stylesheet" href="friends.css">
+    <link rel="stylesheet" href="../../styles/style.css">
+    <link rel="stylesheet" href="../../styles/components/account.css">
+    <link rel="stylesheet" href="../../styles/components/friends.css">
 </head>
 <body>
-    <a href="../index.html" class="back-arrow">
+    <a href="../../index.html" class="back-arrow">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
     </a>
     <div class="account-container">
@@ -43,7 +43,7 @@
             if (user) {
                 loadFriends(user.uid);
             } else {
-                window.location.href = 'login.html';
+                window.location.href = '../login/';
             }
         });
 
@@ -86,5 +86,13 @@
             }
         }
     </script>
+<div id="footer-container"></div>
+<script>
+  fetch('../../components/footer.html')
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById('footer-container').innerHTML = html;
+    });
+</script>
 </body>
 </html>

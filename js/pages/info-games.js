@@ -1,92 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Gallery</title>
-    <link rel="stylesheet" href="../styles/style.css"> 
-</head>
-<body>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getDatabase, ref, push, onValue, get, remove, update } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-    <div class="app-container">
-
-        <header>
-            <h1 data-text="Games" class="glitch-text">Games</h1>
-            <nav>
-                <a href="../index.html" class="btn nav-btn">Home</a>
-
-            </nav>
-        </header>
-
-        <div id="notification-container" class="notification-container"></div>
-
-        <main>
-            <div id="developer-controls" class="hidden" style="margin-bottom: 30px;">
-                <button id="add-game-button" class="btn">
-                    Post a New Game
-                </button>
-            </div>
-            
-            <div id="games-grid" class="games-grid">
-                <div class="full-span loading-message" id="loading-spinner">
-                    <div class="spinner"></div>
-                    <p>Loading games...</p>
-                </div>
-            </div>
-        </main>
-
-        <div id="add-game-modal" class="modal hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Post New Game</h2>
-                    <button id="close-modal-button" class="close-modal-btn">X</button>
-                </div>
-                <form id="game-form" class="form-field-group">
-                    <input type="text" id="game-title" placeholder="Game Title" required class="input-field">
-                    <textarea id="game-description" placeholder="Description" required class="input-field"></textarea>
-                    <input type="file" id="game-cover-photo" accept="image/*" required>
-                    <input type="url" id="game-download-link" placeholder="Download Link (e.g., https://yoursite.com/game.zip)" required class="input-field">
-                    <div id="upload-status" class="upload-status"></div>
-                    <button type="submit" id="submit-button" class="submit-button">
-                        <span id="submit-text">Post Game</span>
-                        <div id="submit-spinner" class="spinner hidden" style="width: 20px; height: 20px; border-width: 3px; margin: 0 auto;"></div>
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <div id="edit-game-modal" class="modal hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Edit Game</h2>
-                    <button id="close-edit-modal-button" class="close-modal-btn">X</button>
-                </div>
-                <form id="edit-game-form" class="form-field-group">
-                    <input type="hidden" id="edit-game-id"> 
-                    <input type="text" id="edit-game-title" placeholder="Game Title" required class="input-field">
-                    <textarea id="edit-game-description" placeholder="Description" required class="input-field"></textarea>
-                    <p>Change Cover Photo (Optional):</p>
-                    <input type="file" id="edit-game-cover-photo" accept="image/*">
-                    <input type="url" id="edit-game-download-link" placeholder="Download Link" required class="input-field">
-                    <div id="edit-upload-status" class="upload-status"></div>
-                    <button type="submit" id="edit-submit-button" class="submit-button">
-                        <span id="edit-submit-text">Save Changes</span>
-                        <div id="edit-submit-spinner" class="spinner hidden" style="width: 20px; height: 20px; border-width: 3px; margin: 0 auto;"></div>
-                    </button>
-                </form>
-            </div>
-        </div>
-
-    </div>
-
-<script type="module">
-    // Import necessary Firebase functions
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-    import { getAuth, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-    import { getDatabase, ref, push, onValue, get, remove, update } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js"; 
-
-    document.addEventListener('DOMContentLoaded', () => {
-    // 🛑 --- HARDCODED FIREBASE & CLOUDINARY CONFIGS (REPLACE THESE) --- 🛑
+document.addEventListener('DOMContentLoaded', () => {
     const firebaseConfig = {
         apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
         authDomain: "yikegames-website.firebaseapp.com",
@@ -100,16 +16,14 @@
     
     const CLOUDINARY_CLOUD_NAME = "dhptbygpt";
     const CLOUDINARY_UPLOAD_PRESET = "unsigned_upload";
-    // 🛑 --- END CONFIGS --- 🛑
 
     let app;
     let auth;
     let db;
     let currentUserIsDeveloper = false;
     let currentUserId = null;
-    let allGamesData = {}; // Cache to hold all games for easy access
+    let allGamesData = {};
 
-    // --- UI Elements ---
     const gamesGrid = document.getElementById('games-grid');
     const developerControls = document.getElementById('developer-controls');
     const addGameButton = document.getElementById('add-game-button');
@@ -128,8 +42,6 @@
     const editSubmitText = document.getElementById('edit-submit-text');
     const editSubmitSpinner = document.getElementById('edit-submit-spinner');
     const editUploadStatus = document.getElementById('edit-upload-status');
-    
-    // --- Utility Functions ---
 
     function showNotification(message, isSuccess) {
         const notification = document.createElement('div');
@@ -180,13 +92,6 @@
         }
     }
 
-    // --- Rendering Functions ---
-
-    /**
-     * Renders a single game card.
-     * @param {string} key - The game's Firebase key.
-     * @param {object} gameData - The game data.
-     */
     function renderGameCard(key, gameData) {
         const gameCard = document.createElement('div');
         gameCard.id = `game-${key}`;
@@ -209,7 +114,6 @@
             </div>
         ` : '';
 
-        // 🔥 CRITICAL FIX: The HTML structure is changed to separate the background layer
         gameCard.innerHTML = `
             <div class="game-card-image-container">
                 <div 
@@ -229,15 +133,9 @@
             </div>
         `;
         
-        // Remove the previous JavaScript background style setting
-        
         gamesGrid.appendChild(gameCard);
     }
     
-    /**
-     * Clears the grid and re-renders all games from the cache (allGamesData)
-     * using the current developer status.
-     */
     function reRenderAllGames() {
         gamesGrid.innerHTML = '';
         if (Object.keys(allGamesData).length > 0) {
@@ -249,8 +147,6 @@
             gamesGrid.innerHTML = '<p class="full-span" style="text-align: center; margin-top: 20px;">NO GAME DATA FOUND. INITIALIZING DATABASE...</p>';
         }
     }
-
-    // --- CRUD Functions (Called by Event Delegation) ---
 
     async function deleteGame(gameId) {
         if (!currentUserIsDeveloper) {
@@ -289,7 +185,6 @@
         editGameModal.classList.remove('hidden');
     }
 
-    // --- Firebase & App Initialization ---
     (async () => {
         try {
             app = initializeApp(firebaseConfig);
@@ -310,7 +205,7 @@
                     const userRef = ref(db, 'users/' + user.uid);
                     const snapshot = await get(userRef);
                     
-                    const isDeveloperBefore = currentUserIsDeveloper; // Store previous state
+                    const isDeveloperBefore = currentUserIsDeveloper;
                     currentUserIsDeveloper = snapshot.exists() ? snapshot.val().isDeveloper === true : false;
                     
                     if (currentUserIsDeveloper) {
@@ -319,8 +214,6 @@
                         developerControls.classList.add('hidden');
                     }
                     
-                    // FIX: Re-render all games if the developer status changed.
-                    // This ensures the edit/delete buttons appear on all existing cards.
                     if (currentUserIsDeveloper !== isDeveloperBefore && Object.keys(allGamesData).length > 0) {
                         reRenderAllGames();
                     }
@@ -328,14 +221,12 @@
                     currentUserId = null;
                     currentUserIsDeveloper = false;
                     developerControls.classList.add('hidden');
-                    // If a developer logs out, re-render to hide buttons
                     if (Object.keys(allGamesData).length > 0) {
                         reRenderAllGames();
                     }
                 }
             });
 
-            // This listener populates the grid and updates the cache
             onValue(ref(db, 'games'), (snapshot) => {
                 loadingSpinner.classList.add('hidden');
                 if (snapshot.exists()) {
@@ -343,7 +234,6 @@
                 } else {
                     allGamesData = {}; 
                 }
-                // FIX: Call the re-render function here which uses the latest games data AND the current developer status.
                 reRenderAllGames();
             }, (error) => {
                 console.error("Error fetching games data:", error);
@@ -359,23 +249,19 @@
         }
     })();
 
-    // --- Event Delegation (FIX: Handles Edit/Delete clicks on all dynamic cards) ---
     gamesGrid.addEventListener('click', (e) => {
         const target = e.target;
         const gameId = target.getAttribute('data-game-id');
 
-        // 1. Handle DELETE click
         if (target.classList.contains('js-delete-btn') && gameId) {
-            deleteGame(gameId); 
+            deleteGame(gameId);
         }
 
-        // 2. Handle EDIT click
         if (target.classList.contains('js-edit-btn') && gameId) {
             openEditModal(gameId);
         }
     });
 
-    // Other Modal Listeners
     addGameButton.addEventListener('click', () => {
         addGameModal.classList.remove('hidden');
     });
@@ -392,7 +278,6 @@
         editUploadStatus.textContent = "";
     });
 
-    // POST NEW GAME Form Submission (CREATE)
     gameForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -449,7 +334,6 @@
         }
     });
     
-    // EDIT GAME Form Submission (UPDATE) 
     editGameForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -466,7 +350,7 @@
         const coverPhotoFile = document.getElementById('edit-game-cover-photo').files[0];
         const downloadLink = document.getElementById('edit-game-download-link').value;
         
-        let coverPhotoUrl = allGamesData[gameId].coverPhotoUrl; 
+        let coverPhotoUrl = allGamesData[gameId].coverPhotoUrl;
 
         try {
             if (coverPhotoFile) {
@@ -502,6 +386,3 @@
 
     });
 });
-</script>
-</body>
-</html>

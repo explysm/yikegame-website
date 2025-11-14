@@ -1,329 +1,8 @@
-<!DOCTYPE html>
-<html lang="en" class="forums-page">
-<head>
-<meta charset="UTF-8">
-<title>Social</title>
-<link rel="stylesheet" href="../styles/style.css">
-<meta http-equiv="Content-Security-Policy" content="
-    default-src * 'unsafe-inline' 'unsafe-eval'; 
-    connect-src *;
-    script-src * 'unsafe-inline' 'unsafe-eval';
-">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+import { getDatabase, ref, push, onValue, set, onDisconnect, get, serverTimestamp, update } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
-<style>
-  /* ---------------------------------------------------------------------- */
-  /* --- STYLESHEET START (Custom Font and Button Styling REMOVED) --- */
-  /* ---------------------------------------------------------------------- */
-  
-  /* Reset and Base Styles */
-  :root {
-      --primary-color: #01edf0;
-      --secondary-color: #0d283c;
-      --accent-color: #00ff00;
-  }
-  
-  body {
-     font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Liberation Mono", "Roboto Mono", monospace;
-    background-color: #0b1a2a;
-    color: #f0f8ff;
-    /* Custom font removed, will inherit browser default */
-  }
-  
-  /* .btn styles removed */
-  
-  /* Page Transition Styles */
-  .fade-enter { opacity: 0; }
-  .fade-enter-active { opacity: 1; transition: opacity 0.5s ease; }
-  .fade-exit-active { opacity: 0; transition: opacity 0.5s ease; }
-
-
-  /* --- Global & Container Styles (Optimized for Desktop) --- */
-  html, body {
-      height: 100%; 
-      margin: 0;
-      padding: 0;
-  }
-
-  .chat-wrapper {
-    display: flex;
-    max-width: 1400px; 
-    width: 90%; 
-    height: 90vh; 
-    margin: 20px auto;
-    gap: 0;
-    border: 2px solid var(--primary-color);
-    box-shadow: 0 0 20px rgba(1, 237, 240, 0.5);
-    background: rgba(0, 0, 0, 0.7);
-  }
-
-  /* --- Sidebar Styles (Always Visible) --- */
-  .users-sidebar {
-    width: 240px;
-    min-width: 240px; 
-    background: rgba(11, 26, 42, 0.95);
-    border-right: 2px solid var(--primary-color);
-    display: flex;
-    flex-direction: column;
-    overflow-y: hidden;
-  }
-
-  .users-sidebar h3 {
-    padding: 15px;
-    margin: 0;
-    border-bottom: 2px solid var(--primary-color);
-    text-align: center;
-    color: var(--primary-color);
-    text-shadow: 0 0 10px var(--primary-color);
-    font-size: 1.1rem;
-    flex-shrink: 0; 
-  }
-
-  .user-list {
-    flex: 1; 
-    overflow-y: auto;
-    padding: 10px;
-    text-align: left; 
-  }
-  
-  /* User Item details */
-  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 5px; border-radius: 4px; transition: background 0.2s; cursor: pointer; }
-  .user-item:hover { background: rgba(1, 237, 240, 0.1); }
-  .user-avatar-wrapper { position: relative; width: 32px; height: 32px; }
-  .user-avatar-small { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--primary-color); object-fit: cover; }
-  .user-name { flex: 1; color: var(--primary-color); font-size: 0.9rem; }
-  .status-indicator { width: 10px; height: 10px; border-radius: 50%; background: #666; border: 2px solid #0b1a2a; position: absolute; bottom: 0; right: 0; }
-  .status-indicator.online { background: var(--accent-color); box-shadow: 0 0 5px var(--accent-color); }
-
-  /* --- Main Chat Area --- */
-  .chat-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: rgba(13, 40, 60, 0.95);
-    min-width: 0; 
-  }
-
-  .chat-header {
-    padding: 15px 20px;
-    border-bottom: 2px solid var(--primary-color);
-    background: rgba(11, 26, 42, 0.8);
-    text-align: left; 
-    flex-shrink: 0;
-  }
-
-  .chat-header h2 {
-    margin: 0;
-    color: var(--primary-color);
-    text-shadow: 0 0 10px var(--primary-color);
-    font-size: 1.3rem;
-  }
-
-  #chat-container {
-    flex: 1; 
-    overflow-y: auto;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    background: transparent;
-    text-align: left; 
-    min-height: 0; 
-  }
-
-  /* --- Message Styling --- */
-  .message { 
-    display: flex; 
-    gap: 12px; 
-    padding: 8px 12px; 
-    border-radius: 4px; 
-    transition: background 0.2s; 
-    word-wrap: break-word; 
-    text-align: left; 
-    position: relative; 
-  }
-
-  .message:hover { 
-    background: rgba(1, 237, 240, 0.05); 
-  }
-  
-  .message-avatar { 
-    width: 40px; 
-    height: 40px; 
-    border-radius: 50%; 
-    border: 2px solid var(--primary-color); 
-    object-fit: cover; 
-    flex-shrink: 0; 
-    box-shadow: 0 0 5px rgba(1, 237, 240, 0.5); 
-  }
-  .message-content { flex: 1; min-width: 0; }
-  
-  .message-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
-  
-  .message-author { 
-      color: var(--primary-color); 
-      font-weight: bold; 
-      font-size: 1rem; 
-      text-shadow: 0 0 5px rgba(1, 237, 240, 0.5); 
-  }
-
-  .message-timestamp { color: rgba(1, 237, 240, 0.5); font-size: 0.75rem; }
-  .message-text { color: #fff; line-height: 1.5; font-size: 0.95rem; }
-  .message.mention-highlight { 
-    background: linear-gradient(90deg, rgba(0, 255, 0, 0.15) 0%, rgba(0, 255, 0, 0.05) 100%); 
-    border-left: 4px solid var(--accent-color); 
-    padding-left: 12px; 
-    margin-left: -4px; 
-  }
-  .mention-tag { 
-    color: var(--accent-color); 
-    font-weight: bold; 
-    background: rgba(0, 255, 0, 0.2); 
-    padding: 2px 4px; 
-    border-radius: 3px; 
-  }
-
-  /* --- Reply Button Style --- */
-  .reply-button {
-    position: absolute;
-    top: -15px; 
-    right: 15px;
-    opacity: 0;
-    transition: opacity 0.2s, transform 0.2s;
-    background: rgba(1, 237, 240, 0.1);
-    color: var(--primary-color);
-    border: 1px solid var(--primary-color);
-    padding: 2px 8px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    border-radius: 3px;
-    transform: translateY(5px);
-    z-index: 10;
-  }
-
-  .message:hover .reply-button {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .reply-button:hover {
-    background: rgba(1, 237, 240, 0.3);
-  }
-  
-
-  /* --- Chat Input Area --- */
-  .chat-input-wrapper { padding: 20px; border-top: 2px solid var(--primary-color); background: rgba(11, 26, 42, 0.8); flex-shrink: 0; }
-  .typing-indicator { min-height: 20px; padding: 0 5px 5px 5px; color: rgba(1, 237, 240, 0.7); font-size: 0.85rem; font-style: italic; text-align: left; }
-  .chat-controls { display: flex; gap: 10px; margin: 0; }
-  #message-input { 
-    flex: 1; 
-    background: rgba(0, 0, 0, 0.5); 
-    border: 2px solid var(--primary-color); 
-    color: var(--primary-color); 
-    padding: 12px 15px; 
-    font-size: 1rem; 
-    font-family: inherit; 
-    border-radius: 4px; 
-    box-shadow: 0 0 10px rgba(1, 237, 240, 0.3); 
-  }
-  #message-input:focus { box-shadow: 0 0 15px rgba(1, 237, 240, 0.5); outline: none; }
-  
-  /* #send-btn styles removed */
-  
-  .char-count { font-size: 0.8rem; color: rgba(1, 237, 240, 0.6); text-align: right; margin-top: 5px; }
-
-  /* --- Utility Styles --- */
-  .hidden-title { display: none; }
-  .back-link { margin: 20px auto; max-width: 1400px; width: 90%; text-align: left; }
-
-  /* --- Mobile Responsiveness --- */
-  @media (max-width: 768px) {
-    body {
-      padding: 0;
-    }
-    .chat-wrapper {
-      flex-direction: column;
-      width: 100%;
-      height: 100vh;
-      margin: 0;
-      border: none;
-      gap: 0;
-    }
-    .users-sidebar {
-      width: 100%;
-      min-width: unset;
-      height: 150px; /* Reduced height for user list */
-      border-right: none;
-      border-bottom: 2px solid var(--primary-color);
-    }
-    .chat-main {
-      height: calc(100% - 150px);
-    }
-    .chat-header {
-      padding: 10px 15px;
-    }
-    .chat-header h2 {
-      font-size: 1.1rem;
-    }
-    #chat-container {
-      padding: 10px;
-    }
-    .chat-input-wrapper {
-      padding: 10px;
-    }
-    #message-input {
-      padding: 10px;
-      font-size: 0.9rem;
-    }
-    .back-link {
-      display: none; /* Hide back link on mobile for more space */
-    }
-  }
-
-  /* ---------------------------------------------------------------------- */
-  /* --- STYLESHEET END --- */
-  /* ---------------------------------------------------------------------- */
-</style>
-</head>
-<body class="forums-page">
-<h1 class="hidden-title">Social</h1> 
-
-<div class="chat-wrapper">
-  <div class="users-sidebar">
-    <h3>ONLINE USERS</h3>
-    <div class="user-list" id="user-list">
-      <p style="text-align: center; color: rgba(1, 237, 240, 0.5); padding: 20px;">Loading users...</p>
-    </div>
-  </div>
-
-  <div class="chat-main">
-        <div class="chat-header">
-            <h2>Social</h2>
-            <a href="../account/friends.html" class="btn">Friends</a>
-        </div>
-
-    <div id="chat-container"></div> 
-
-    <div class="chat-input-wrapper">
-      <div class="typing-indicator" id="typing-indicator"></div>
-      <div class="chat-controls">
-        <input type="text" id="message-input" placeholder="You must be logged in to chat." disabled maxlength="500">
-        <button id="send-btn" class="username-btn" disabled>Send</button>
-      </div>
-      <div class="char-count" id="char-count">0 / 500</div>
-    </div>
-  </div>
-</div>
-
-<div class="back-link">
-  <a href="../index.html" class="btn">Back</a>
-</div>
-
-<script type="module">
-  // Using corrected and stable Firebase SDK imports
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-  import { getDatabase, ref, push, onValue, set, onDisconnect, get, serverTimestamp, update } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
-
+document.addEventListener('DOMContentLoaded', () => {
   const firebaseConfig = {
     apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
     authDomain: "yikegames-website.firebaseapp.com",
@@ -355,7 +34,6 @@
   const typingIndicator = document.getElementById("typing-indicator");
   const userList = document.getElementById("user-list");
 
-  // Rate Limiter Class (unchanged)
   class RateLimiter {
     constructor(maxMessages, timeWindowMs) {
       this.maxMessages = maxMessages;
@@ -379,23 +57,19 @@
   }
   const rateLimiter = new RateLimiter(5, 10000);
 
-  // XSS Protection (unchanged)
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
 
-  /* Get User Data (IsDeveloper check is removed) */
   function getUserData(authorName) {
-    // Check if the author is the current user (fastest check)
     if (currentUser && currentUser.displayName === authorName) {
       return {
         photoURL: currentUser.photoURL || usersCache[currentUser.uid]?.photoURL || defaultPfp,
       };
     }
 
-    // Search the cache by displayName or email
     const userKeys = Object.keys(usersCache);
     const userKey = userKeys.find(key => 
       usersCache[key].displayName === authorName || usersCache[key].email === authorName
@@ -407,13 +81,11 @@
       };
     }
     
-    // Default fallback
     return {
       photoURL: defaultPfp,
     };
   }
 
-  // Format timestamp (unchanged)
   function formatTimestamp(timestamp) {
     if (!timestamp) return '';
     const date = new Date(timestamp);
@@ -428,7 +100,6 @@
     }
   }
 
-  // Mention logic (unchanged)
   function checkForMention(messageText, currentUserName) {
     if (!currentUserName || !messageText) return false;
     const escapedUserName = currentUserName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -443,7 +114,6 @@
     return escapeHtml(text).replace(mentionPattern, '<span class="mention-tag">$1</span>');
   }
 
-  /* Insert Mention into Chatbox (unchanged) */
   function insertMention(authorName) {
       if (!currentDisplayName) {
         alert("You must be logged in to mention others.");
@@ -463,8 +133,6 @@
       messageInput.focus();
   }
 
-
-  // Event Listeners (unchanged)
   messageInput.addEventListener('input', () => {
     const length = messageInput.value.length;
     charCount.textContent = `${length} / 500`;
@@ -484,7 +152,6 @@
     }, 2000);
   });
 
-  // Listen for typing and online users (unchanged logic)
   const usersRef = ref(db, "users");
   onValue(usersRef, snapshot => {
     const usersData = snapshot.val();
@@ -495,7 +162,6 @@
     }
   });
 
-  // Update user list (unchanged)
   function updateUserList(usersData) {
     userList.innerHTML = '';
     
@@ -536,7 +202,6 @@
     });
   }
 
-  // Update typing indicator (unchanged)
   function updateTypingIndicator(usersData) {
     const typingUsers = Object.entries(usersData)
       .filter(([uid, data]) => data.typing && data.online && uid !== currentUser?.uid) 
@@ -553,7 +218,6 @@
     }
   }
 
-  /* Message Listener Function (Cleaned) */
   function startChatListeners() {
     if (isMessageListenerActive) return; 
 
@@ -581,7 +245,6 @@
         const messageDiv = document.createElement("div");
         messageDiv.className = "message";
 
-        // Mention highlighting logic
         if (currentDisplayName) {
           const isNotSelf = msg.author.toLowerCase() !== currentDisplayName.toLowerCase();
           const isMentioned = checkForMention(msg.text, currentDisplayName);
@@ -604,8 +267,6 @@
 
         const author = document.createElement("span");
         author.className = "message-author";
-        
-        // Only the author's display name text remains
         author.textContent = msg.author; 
         
         const timestamp = document.createElement("span");
@@ -624,7 +285,6 @@
         messageDiv.appendChild(avatar);
         messageDiv.appendChild(content);
 
-        // Reply Button Logic
         const replyButton = document.createElement("button");
         replyButton.className = "reply-button";
         replyButton.textContent = "Reply";
@@ -649,10 +309,7 @@
 
     isMessageListenerActive = true;
   }
-  /* --- END Message Listener Function --- */
 
-
-  // Authentication and Presence Management
   onAuthStateChanged(auth, async user => {
     currentUser = user;
 
@@ -667,14 +324,12 @@
         userData = userSnapshot.val();
         nameToUse = userData.displayName || nameToUse;
         
-        // Update user data on login/relogin
         await update(userRef, {
             displayName: nameToUse,
             photoURL: user.photoURL || userData.photoURL || null,
             email: user.email,
         });
       } else {
-        // New user login - create profile
         await set(userRef, {
           displayName: nameToUse,
           photoURL: user.photoURL || null,
@@ -684,7 +339,6 @@
         });
       }
       
-      // Update cache and set display name
       usersCache[user.uid] = { 
         ...userData, 
         displayName: nameToUse, 
@@ -715,13 +369,14 @@
       messageInput.placeholder = "Type your message...";
     } else {
       currentDisplayName = null;
+      const previousUser = currentUser;
       currentUser = null;
       messageInput.disabled = true;
       sendBtn.disabled = true;
       messageInput.placeholder = "You must be logged in to chat.";
       
-      if (currentUser) {
-          update(ref(db, `users/${currentUser.uid}`), { typing: false });
+      if (previousUser) {
+          update(ref(db, `users/${previousUser.uid}`), { typing: false });
       }
       
       chatContainer.innerHTML = '<p style="text-align: center; color: rgba(1, 237, 240, 0.5); padding: 40px;">Please log in to view and send messages.</p>';
@@ -729,8 +384,6 @@
     }
   });
 
-
-  // Discord webhook (unchanged)
   async function sendToDiscord(username, message, avatarUrl) {
     message = message + " - (***This was sent from the web client.***)"
     const payload = {
@@ -756,7 +409,6 @@
     }
   }
 
-  // Send message (unchanged)
   sendBtn.addEventListener("click", () => {
     if (!currentDisplayName) {
       alert("You must be logged in to send messages.");
@@ -800,7 +452,6 @@
     charCount.classList.remove('warning', 'error');
   });
 
-  // Enter key to send (unchanged)
   messageInput.addEventListener("keydown", e => {
     if (e.key === "Enter" && !messageInput.disabled) {
       e.preventDefault();
@@ -808,7 +459,6 @@
     }
   });
 
-  // Page transitions (unchanged)
   document.body.classList.add('fade-enter');
   setTimeout(() => {
     document.body.classList.add('fade-enter-active');
@@ -825,7 +475,4 @@
       }
     });
   });
-</script>
-</body>
-</html>
-
+});

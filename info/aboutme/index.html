@@ -13,7 +13,7 @@
         <p>
             Hi! I'm <strong>explysm</strong> (or YikeGames), a 13-year-old who dreams of being a game developer.  
             I'm American, living in Texas, the "biggest state in the US" *cough cough*.  
-            Thank you for visiting my website! Make sure to check out my <a href="games.html">games</a>.
+            Thank you for visiting my website! Make sure to check out my <a href="../games/">games</a>.
         </p>
 
         <a href="../index.html">
@@ -45,6 +45,14 @@
       }
     });
   });
+</script>
+<div id="footer-container"></div>
+<script>
+  fetch('../../components/footer.html')
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById('footer-container').innerHTML = html;
+    });
 </script>
 </body>
 </html>
