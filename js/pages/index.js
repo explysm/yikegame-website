@@ -17,29 +17,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// --- Electron Update Notification ---
-async function checkForNewRelease() {
-    if (typeof window.electronAPI === 'undefined') return;
-    try {
-        const CURRENT_TAG = await window.electronAPI.getCurrentTag();
-        if (CURRENT_TAG === "unknown-tag") return;
-
-        const REPO = "explysm/yikegames";
-        const notificationArea = document.getElementById("update-notification");
-        const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`);
-        const latestRelease = await res.json();
-        const LATEST_TAG = latestRelease.tag_name;
-
-        if (LATEST_TAG !== CURRENT_TAG) {
-            notificationArea.style.display = 'block';
-            notificationArea.innerHTML = `
-                <p class="warning1" style="color: red; font-weight: bold;">
-                    📢 New App Update Available! Your version: ${CURRENT_TAG}, Latest: 
-                    <a href="${latestRelease.html_url}" target="_blank">Version ${LATEST_TAG}</a>.
-                </p>`;
-        }
-    } catch (err) { console.error("Update check error:", err); }
-}
 
 // --- Auth State Update ---
 onAuthStateChanged(auth, user => {
@@ -182,8 +159,5 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
-    // Run Electron update check
-    checkForNewRelease();
 });
 
