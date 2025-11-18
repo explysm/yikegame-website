@@ -57,6 +57,16 @@
     margin-right: 5px;
 }
 
+.gato-logo-icon {
+    height: 1.5em; /* Adjust size as needed */
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+#initial-search-area .gato-logo-icon {
+    height: 2.5rem; /* Larger size for central display */
+}
+
 /* Search Forms - Central and Header versions */
 #search-form-central, #search-form-header {
     display: flex;
@@ -77,6 +87,16 @@
     flex-grow: 1;
     border-radius: 0; /* Sharp corners */
     border-right: none; /* Remove right border for input */
+    /* Apply base input-field styles */
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #01edf0;
+    color: #01edf0;
+    padding: 10px;
+    font-size: 1.2rem;
+    font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Liberation Mono", "Roboto Mono", monospace;
+    outline: none;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5), inset 0 0 5px rgba(1, 237, 240, 0.5);
+    transition: box-shadow 0.3s ease;
 }
 
 #search-input-central:focus, #search-input-header:focus {
@@ -142,8 +162,15 @@
     color: #01edf0;
     padding: 20% 0;
     text-align: center;
-    font-size: 1.2em;
-    text-shadow: 0 0 5px #01edf0;
+    font-size: 1.8em; /* Larger font size */
+    font-weight: bold; /* Make it bold */
+    text-shadow: 0 0 10px #01edf0, 0 0 20px #01edf0; /* Stronger neon glow */
+    animation: pulse 2s infinite alternate; /* Add a subtle pulse animation */
+}
+
+@keyframes pulse {
+    from { text-shadow: 0 0 10px #01edf0, 0 0 20px #01edf0; }
+    to { text-shadow: 0 0 15px #01edf0, 0 0 25px #01edf0; }
 }
 
 /* Video List Styling */
@@ -215,9 +242,20 @@
 .message {
     text-align: center;
     padding: 40px;
-    color: #01edf0;
-    font-size: 1.1em;
-    text-shadow: 0 0 5px #01edf0;
+    color: #ff007f; /* Use a distinct neon color */
+    font-size: 1.5em; /* Larger font size */
+    font-weight: bold;
+    text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f; /* Stronger neon glow */
+    border: 2px solid #ff007f; /* Add a border */
+    background-color: rgba(0, 0, 0, 0.7); /* Darker background */
+    margin: 20px auto; /* Center it and add margin */
+    max-width: 80%; /* Limit width */
+    animation: pulse-message 2s infinite alternate; /* Add a subtle pulse animation */
+}
+
+@keyframes pulse-message {
+    from { text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f; border-color: #ff007f; }
+    to { text-shadow: 0 0 15px #ff007f, 0 0 25px #ff007f; border-color: #ff007f; }
 }
 
 /* Responsive adjustments */
@@ -255,4 +293,143 @@
     #results-container {
         grid-template-columns: 1fr;
     }
+}
+
+/* Search History Styling */
+.search-history {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #01edf0;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
+    border-radius: 0;
+    width: 500px; /* Match search bar width */
+    max-width: 90%;
+    margin-top: 5px;
+    z-index: 50;
+    text-align: left;
+}
+
+.search-history ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.search-history li {
+    padding: 8px 15px;
+    color: #01edf0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.search-history li:hover {
+    background-color: rgba(1, 237, 240, 0.2);
+    color: #fff;
+}
+
+/* Positioning for central search history */
+#initial-search-area .search-history {
+    top: calc(50% + 50px); /* Adjust based on search bar height */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Positioning for header search history */
+#main-header .search-history {
+    top: 100%; /* Position below the header search form */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px; /* Match header search bar width */
+    max-width: 90%;
+}
+
+/* Autocomplete Suggestions Styling */
+.autocomplete-suggestions {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #ff007f; /* Different color for suggestions */
+    box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+    border-radius: 0;
+    width: 500px; /* Match search bar width */
+    max-width: 90%;
+    margin-top: 5px;
+    z-index: 51; /* Higher z-index than history */
+    text-align: left;
+}
+
+.autocomplete-suggestions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.autocomplete-suggestions li {
+    padding: 8px 15px;
+    color: #ff007f;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.autocomplete-suggestions li:hover {
+    background-color: rgba(255, 0, 127, 0.2);
+    color: #fff;
+}
+
+/* Positioning for central autocomplete suggestions */
+#initial-search-area .autocomplete-suggestions {
+    top: calc(50% + 50px); /* Adjust based on search bar height */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Positioning for header autocomplete suggestions */
+#main-header .autocomplete-suggestions {
+    top: 100%; /* Position below the header search form */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px; /* Match header search bar width */
+    max-width: 90%;
+}
+
+/* Video Details Container */
+#video-details-container {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #ff007f; /* Use a different neon color for details */
+    box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
+    border-radius: 0;
+    padding: 15px;
+    margin-bottom: 20px;
+    color: #fff;
+    font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Liberation Mono", "Roboto Mono", monospace;
+}
+
+#video-details-container h3 {
+    font-size: 1.5em;
+    color: #01edf0; /* Neon blue for title */
+    text-shadow: 0 0 8px #01edf0;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+#video-details-container p {
+    font-size: 0.9em;
+    color: #ff007f; /* Neon pink for other details */
+    text-shadow: 0 0 5px #ff007f;
+    margin: 5px 0;
+}
+
+/* Loading Spinner Styling */
+.loading-spinner {
+    border: 4px solid rgba(1, 237, 240, 0.3);
+    border-top: 4px solid #01edf0;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

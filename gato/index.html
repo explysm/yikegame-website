@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modern YouTube Search Player</title>
+    <link rel="icon" type="image/png" href="../assets/icon/gato.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../styles/style.css">
     <link rel="stylesheet" href="../styles/pages/gato.css">
@@ -12,31 +13,37 @@
 
     <header id="main-header">
         <div class="logo">
-            <i class="fab fa-youtube"></i>
-            CustomPlayer
+            <img src="../assets/icon/gato.png" alt="Gato Logo" class="gato-logo-icon">
+            Gato
         </div>
         <form id="search-form-header" class="hidden">
             <input type="text" id="search-input-header" placeholder="Search">
+            <div id="autocomplete-suggestions-header" class="autocomplete-suggestions hidden"></div>
             <button type="submit" id="search-button-header" title="Search"><i class="fas fa-search"></i></button>
         </form>
+        <div id="search-history-header" class="search-history hidden"></div>
         <div></div>
     </header>
 
     <div id="initial-search-area">
-        <div class="logo">
-            <i class="fab fa-youtube"></i>
-            CustomPlayer
-        </div>
         <form id="search-form-central">
             <input type="text" id="search-input-central" placeholder="Search">
+            <div id="autocomplete-suggestions-central" class="autocomplete-suggestions hidden"></div>
             <button type="submit" id="search-button-central" title="Search"><i class="fas fa-search"></i></button>
         </form>
+        <div id="search-history-central" class="search-history hidden"></div>
     </div>
 
     <div class="container">
         <div id="main-content" class="hidden">
             <div id="player-container">
-                <p>Search for a video above to begin playing.</p>
+                <p>INITIATE SEARCH PROTOCOL.<br>LOCATING VISUAL DATA STREAM...</p>
+            </div>
+            <div id="video-details-container" class="hidden">
+                <h3 id="video-title-display"></h3>
+                <p id="video-channel-display"></p>
+                <p id="video-stats-display"></p>
+                <p id="video-published-display"></p>
             </div>
 
             <div id="results-container">

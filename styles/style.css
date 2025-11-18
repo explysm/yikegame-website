@@ -49,6 +49,42 @@ body::before {
     z-index: 100;
 }
 
+/* Gato Promo Header */
+#gato-promo-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(13, 40, 60, 0.9); /* Darker, semi-transparent background */
+    color: #01edf0; /* Neon blue/cyan text */
+    text-align: center;
+    padding: 8px 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    z-index: 1000; /* Ensure it floats above other content */
+    border-bottom: 2px solid #01edf0; /* Retro border */
+    box-shadow: 0 0 15px rgba(1, 237, 240, 0.5);
+    text-shadow: 0 0 5px #01edf0;
+}
+
+#gato-promo-header a {
+    color: #ff007f; /* Pink/red for the link */
+    text-decoration: none;
+    text-shadow: 0 0 5px #ff007f;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+#gato-promo-header a:hover {
+    color: #fff;
+    text-shadow: 0 0 15px #ff007f;
+}
+
+/* Adjust body padding to prevent content from being hidden behind the fixed header */
+body {
+    padding-top: 50px; /* Adjust based on the height of the promo header */
+}
+
 /* Glitch effect on hover */
 .glitch-text:hover::before, .glitch-text:hover::after {
     content: attr(data-text);
