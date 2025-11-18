@@ -286,6 +286,12 @@ async function handleSearch(query, isInitialSearch = false) {
         // Update history display after a new search
         renderSearchHistory(loadSearchHistory(), searchHistoryCentral, searchInputCentral);
         renderSearchHistory(loadSearchHistory(), searchHistoryHeader, searchInputHeader);
+
+        // Hide search history and autocomplete suggestions after a search
+        searchHistoryCentral.classList.add('hidden');
+        searchHistoryHeader.classList.add('hidden');
+        autocompleteSuggestionsCentral.classList.add('hidden');
+        autocompleteSuggestionsHeader.classList.add('hidden');
     } catch (error) {
         console.error("Error fetching data:", error);
         resultsContainer.innerHTML = `<p class="message" style="color: var(--youtube-red);">Error: ${error.message || 'Could not fetch results. Check console for details.'}</p>`;

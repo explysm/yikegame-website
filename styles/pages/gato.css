@@ -75,6 +75,7 @@
     max-width: 90%; /* Responsive width */
     margin: 0 auto;
     transition: width 0.3s ease-in-out;
+    position: relative; /* Added for dropdown positioning */
 }
 
 #search-form-central.focused, #search-form-header.focused {
@@ -329,18 +330,18 @@
 
 /* Positioning for central search history */
 #initial-search-area .search-history {
-    top: calc(50% + 50px); /* Adjust based on search bar height */
-    left: 50%;
-    transform: translateX(-50%);
+    top: 100%; /* Position directly below the input */
+    left: 0;
+    transform: translateX(0); /* Remove horizontal centering */
+    width: 100%; /* Span full width of parent form */
 }
 
 /* Positioning for header search history */
 #main-header .search-history {
-    top: 100%; /* Position below the header search form */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 500px; /* Match header search bar width */
-    max-width: 90%;
+    top: 100%; /* Position directly below the input */
+    left: 0;
+    transform: translateX(0); /* Remove horizontal centering */
+    width: 100%; /* Span full width of parent form */
 }
 
 /* Autocomplete Suggestions Styling */
@@ -377,18 +378,18 @@
 
 /* Positioning for central autocomplete suggestions */
 #initial-search-area .autocomplete-suggestions {
-    top: calc(50% + 50px); /* Adjust based on search bar height */
-    left: 50%;
-    transform: translateX(-50%);
+    top: 100%; /* Position directly below the input */
+    left: 0;
+    transform: translateX(0); /* Remove horizontal centering */
+    width: 100%; /* Span full width of parent form */
 }
 
 /* Positioning for header autocomplete suggestions */
 #main-header .autocomplete-suggestions {
-    top: 100%; /* Position below the header search form */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 500px; /* Match header search bar width */
-    max-width: 90%;
+    top: 100%; /* Position directly below the input */
+    left: 0;
+    transform: translateX(0); /* Remove horizontal centering */
+    width: 100%; /* Span full width of parent form */
 }
 
 /* Video Details Container */
