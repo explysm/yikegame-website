@@ -1,0 +1,258 @@
+/* Custom styles for the Gato YouTube Player page */
+
+/* Utility class for hiding elements */
+.hidden {
+    display: none !important;
+}
+
+/* Initial Search Area - Centered and full height */
+#initial-search-area {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Take full viewport height */
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    /* Inherit background from body (style.css) */
+}
+
+#initial-search-area .logo {
+    font-size: 2.5rem; /* Larger logo for central display */
+    margin-bottom: 30px;
+    color: #01edf0; /* Neon blue/cyan */
+    text-shadow: 0 0 10px #01edf0, 0 0 20px #01edf0;
+}
+
+/* Header (Top Bar) - Initially hidden, appears after search */
+#main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    border-bottom: 2px solid #01edf0; /* Retro border */
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    width: 100%;
+    box-shadow: 0 0 15px rgba(1, 237, 240, 0.5);
+}
+
+#main-header .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #01edf0;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    text-shadow: 0 0 5px #01edf0;
+}
+
+#main-header .logo i {
+    color: #ff0000; /* YouTube red */
+    margin-right: 5px;
+}
+
+/* Search Forms - Central and Header versions */
+#search-form-central, #search-form-header {
+    display: flex;
+    align-items: center;
+    width: 500px;
+    max-width: 90%; /* Responsive width */
+    margin: 0 auto;
+    transition: width 0.3s ease-in-out;
+}
+
+#search-form-central.focused, #search-form-header.focused {
+    width: 700px; /* Expand slightly on focus */
+    max-width: 95%;
+}
+
+#search-input-central, #search-input-header {
+    /* Inherit retro input field styles from style.css */
+    flex-grow: 1;
+    border-radius: 0; /* Sharp corners */
+    border-right: none; /* Remove right border for input */
+}
+
+#search-input-central:focus, #search-input-header:focus {
+    border-color: #01edf0; /* Neon blue focus */
+    box-shadow: 0 0 20px #01edf0, inset 0 0 10px #01edf0;
+}
+
+#search-button-central, #search-button-header {
+    /* Inherit retro button styles from style.css */
+    background-color: transparent;
+    border: 2px solid #01edf0;
+    color: #01edf0;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    text-shadow: 0 0 5px #01edf0;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
+    border-radius: 0; /* Sharp corners */
+    margin-left: -2px; /* Overlap with input border */
+}
+
+#search-button-central:hover, #search-button-header:hover {
+    background-color: rgba(1, 237, 240, 0.2);
+    box-shadow: 0 0 20px #01edf0;
+    color: #fff;
+}
+
+/* Main Content Area - Initially hidden, appears after search */
+#main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 0;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Player Container */
+#player-container {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #01edf0;
+    box-shadow: 0 0 15px rgba(1, 237, 240, 0.5);
+    border-radius: 0; /* Retro sharp corners */
+    overflow: hidden;
+    margin-bottom: 30px;
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 aspect ratio */
+}
+
+#player-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+#player-container p {
+    color: #01edf0;
+    padding: 20% 0;
+    text-align: center;
+    font-size: 1.2em;
+    text-shadow: 0 0 5px #01edf0;
+}
+
+/* Video List Styling */
+#results-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.video-result {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #01edf0;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
+    border-radius: 0;
+    text-align: left;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.video-result:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px #01edf0;
+    background-color: rgba(1, 237, 240, 0.1);
+}
+
+.video-thumbnail-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 thumbnail ratio */
+    overflow: hidden;
+}
+
+.video-thumbnail {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-bottom: 1px solid #01edf0;
+}
+
+.video-info {
+    padding: 10px;
+}
+
+.video-title {
+    font-size: 1em;
+    font-weight: bold;
+    color: #fff;
+    margin: 0 0 5px 0;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-shadow: 0 0 3px #01edf0;
+}
+
+.video-description {
+    font-size: 0.8em;
+    color: #01edf0;
+    opacity: 0.8;
+    margin: 0;
+    height: 36px; /* Fix height for two lines of text */
+    overflow: hidden;
+}
+
+/* Message Styling */
+.message {
+    text-align: center;
+    padding: 40px;
+    color: #01edf0;
+    font-size: 1.1em;
+    text-shadow: 0 0 5px #01edf0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #search-form-central, #search-form-header {
+        width: 95%;
+    }
+
+    #search-form-central.focused, #search-form-header.focused {
+        width: 100%;
+    }
+
+    #initial-search-area .logo {
+        font-size: 2rem;
+    }
+
+    #main-header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    #main-header .logo {
+        font-size: 1.2em;
+    }
+
+    #search-form-header {
+        width: 100%;
+    }
+
+    #main-content {
+        padding: 10px 0;
+    }
+
+    #results-container {
+        grid-template-columns: 1fr;
+    }
+}

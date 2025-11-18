@@ -5,228 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modern YouTube Search Player</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* --- CSS STYLES --- */
-        :root {
-            --youtube-red: #ff0000;
-            --background-dark: #181818;
-            --text-light: #f1f1f1;
-            --card-dark: #202020;
-            --focus-shadow: rgba(255, 0, 0, 0.4);
-        }
-
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background-color: var(--background-dark);
-            color: var(--text-light);
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* 1. HEADER (Top Bar) */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background-color: var(--background-dark);
-            border-bottom: 1px solid #303030;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: white;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .logo i {
-            color: var(--youtube-red);
-            margin-right: 5px;
-        }
-
-        /* 2. CENTRAL SEARCH BAR (Home Page Look) */
-        #search-form {
-            display: flex;
-            align-items: center;
-            width: 500px;
-            margin: 0 auto;
-            transition: width 0.3s ease-in-out;
-        }
-
-        #search-form.focused {
-            width: 700px; /* Expand slightly on focus for a modern look */
-        }
-
-        #search-input {
-            padding: 10px 15px;
-            border: 1px solid #3d3d3d;
-            border-right: none;
-            background-color: #121212;
-            color: var(--text-light);
-            border-radius: 20px 0 0 20px;
-            width: 100%;
-            font-size: 1em;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        #search-input:focus {
-            border-color: #1c62b9; /* YouTube-style focus blue */
-            box-shadow: 0 0 0 1px #1c62b9;
-        }
-
-        #search-button {
-            padding: 10px 20px;
-            border: 1px solid #3d3d3d;
-            background-color: #303030;
-            color: #aaaaaa;
-            border-radius: 0 20px 20px 0;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        #search-button:hover {
-            background-color: #444444;
-            color: white;
-        }
-
-        /* 3. CONTENT LAYOUT */
-        #main-content {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding: 20px 0;
-        }
-        
-        /* 4. Custom Embed Player Container */
-        #player-container {
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            margin-bottom: 30px;
-            /* Aspect Ratio Box (16:9) */
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%; /* 9 / 16 = 0.5625 */
-        }
-
-        #player-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        #player-container p {
-            color: #aaa;
-            padding: 20% 0; 
-            text-align: center;
-            font-size: 1.2em;
-        }
-
-        /* 5. Video List Styling */
-        #results-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-        }
-
-        .video-result {
-            background: var(--card-dark);
-            border-radius: 8px;
-            text-align: left;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
-            border: 1px solid #303030;
-        }
-
-        .video-result:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            background-color: #303030;
-        }
-        
-        .video-thumbnail-wrapper {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%; /* 16:9 thumbnail ratio */
-            overflow: hidden;
-        }
-
-        .video-thumbnail {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .video-info {
-            padding: 10px;
-        }
-
-        .video-title {
-            font-size: 1em;
-            font-weight: 500;
-            color: var(--text-light);
-            margin: 0 0 5px 0;
-            /* Limit title to two lines */
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-
-        .video-description {
-            font-size: 0.8em;
-            color: #aaaaaa;
-            margin: 0;
-            height: 36px; /* Fix height for two lines of text */
-            overflow: hidden;
-        }
-        
-        /* Message Styling */
-        .message {
-            text-align: center;
-            padding: 40px;
-            color: #aaaaaa;
-            font-size: 1.1em;
-        }
-    </style>
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="../styles/pages/gato.css">
 </head>
 <body>
 
-    <header>
+    <header id="main-header">
         <div class="logo">
             <i class="fab fa-youtube"></i>
             CustomPlayer
         </div>
-        <form id="search-form">
-            <input type="text" id="search-input" placeholder="Search" value="mitosis stages">
-            <button type="submit" id="search-button" title="Search"><i class="fas fa-search"></i></button>
+        <form id="search-form-header" class="hidden">
+            <input type="text" id="search-input-header" placeholder="Search">
+            <button type="submit" id="search-button-header" title="Search"><i class="fas fa-search"></i></button>
         </form>
-        <div></div> </header>
+        <div></div>
+    </header>
+
+    <div id="initial-search-area">
+        <div class="logo">
+            <i class="fab fa-youtube"></i>
+            CustomPlayer
+        </div>
+        <form id="search-form-central">
+            <input type="text" id="search-input-central" placeholder="Search">
+            <button type="submit" id="search-button-central" title="Search"><i class="fas fa-search"></i></button>
+        </form>
+    </div>
 
     <div class="container">
-        <div id="main-content">
+        <div id="main-content" class="hidden">
             <div id="player-container">
                 <p>Search for a video above to begin playing.</p>
             </div>
@@ -237,129 +45,7 @@
         </div>
     </div>
 
-    <script>
-        // --- JAVASCRIPT LOGIC ---
-        const searchForm = document.getElementById('search-form');
-        const searchInput = document.getElementById('search-input');
-        const resultsContainer = document.getElementById('results-container');
-        const playerContainer = document.getElementById('player-container');
-
-        // ⚠️ WARNING: THIS KEY IS PUBLICLY EXPOSED. ONLY USE FOR LOCAL TESTING.
-        const API_KEY = "AIzaSyC4F_RXjIYigh5aN-crA5cq75GFweNbjNA"; 
-        const BASE_URL = "https://www.googleapis.com/youtube/v3/search";
-        
-        // --- ANIMATION / MODERN JAVASCRIPT ---
-        // Add focus class to search form for visual effect
-        searchInput.addEventListener('focus', () => {
-            searchForm.classList.add('focused');
-        });
-        searchInput.addEventListener('blur', () => {
-            searchForm.classList.remove('focused');
-        });
-
-        /**
-         * Clears the player and sets the new video ID.
-         * @param {string} videoId - The YouTube video ID.
-         */
-        function embedVideo(videoId) {
-            const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
-            
-            const iframe = document.createElement('iframe');
-            iframe.setAttribute('src', embedUrl);
-            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
-            iframe.setAttribute('allowfullscreen', 'true');
-
-            playerContainer.innerHTML = '';
-            playerContainer.appendChild(iframe);
-        }
-
-        /**
-         * Renders the search results from the live YouTube API data.
-         * @param {Array<Object>} results - An array of video objects.
-         */
-        function renderResults(results) {
-            resultsContainer.innerHTML = ''; 
-
-            if (results.length === 0) {
-                resultsContainer.innerHTML = '<p class="message">No results found. Please try a different query.</p>';
-                playerContainer.innerHTML = '<p>No video selected.</p>';
-                return;
-            }
-
-            results.forEach(video => {
-                const resultDiv = document.createElement('div');
-                resultDiv.classList.add('video-result');
-                
-                // YouTube thumbnail URL
-                const thumbnailUrl = `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
-                
-                resultDiv.onclick = () => embedVideo(video.id);
-
-                resultDiv.innerHTML = `
-                    <div class="video-thumbnail-wrapper">
-                        <img src="${thumbnailUrl}" alt="${video.title} thumbnail" class="video-thumbnail">
-                    </div>
-                    <div class="video-info">
-                        <p class="video-title">${video.title}</p>
-                        <p class="video-description">${video.description}</p>
-                    </div>
-                `;
-                resultsContainer.appendChild(resultDiv);
-            });
-
-            // Automatically embed the first result
-            if (results.length > 0) {
-                embedVideo(results[0].id);
-            }
-        }
-
-        /**
-         * Handles the search form submission, fetching data from the live YouTube API.
-         */
-        searchForm.addEventListener('submit', function(event) {
-            event.preventDefault(); 
-            const query = searchInput.value.trim();
-            if (!query) return;
-
-            // Encode the query for URL safety
-            const encodedQuery = encodeURIComponent(query);
-
-            const API_URL = `${BASE_URL}?part=snippet&q=${encodedQuery}&key=${API_KEY}&type=video&maxResults=10&videoEmbeddable=true`;
-            
-            resultsContainer.innerHTML = '<p class="message">Loading search results...</p>';
-
-            fetch(API_URL)
-                .then(response => {
-                    if (!response.ok) {
-                        // Check for common API errors (e.g., key restrictions, rate limits)
-                        if (response.status === 403) {
-                            throw new Error("API Forbidden (403). Check your API Key usage limits and restrictions.");
-                        }
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Map the raw API response to the format needed for rendering
-                    const results = data.items.map(item => ({
-                        id: item.id.videoId,
-                        title: item.snippet.title,
-                        description: item.snippet.description
-                    }));
-                    renderResults(results);
-                })
-                .catch(error => {
-                    console.error("Error fetching data:", error);
-                    resultsContainer.innerHTML = `<p class="message" style="color: var(--youtube-red);">Error: ${error.message || 'Could not fetch results. Check console for details.'}</p>`;
-                    playerContainer.innerHTML = `<p>Search Failed</p>`;
-                });
-        });
-        
-        // Optionally run a search on load to populate the page
-        document.addEventListener('DOMContentLoaded', () => {
-            searchForm.dispatchEvent(new Event('submit'));
-        });
-    </script>
+    <script src="../js/pages/gato.js" defer></script>
 </body>
 </html>
 
