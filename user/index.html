@@ -24,6 +24,7 @@
             <p id="user-join-date">Loading...</p>
             <p id="profile-views">Loading...</p>
         </div>
+        <div id="profile-error-message" class="error-message hidden"></div>
         <div class="profile-body">
             <section class="profile-section" id="lastfm-now-playing-section" style="display: none;">
                 <h2>Currently Listening</h2>
@@ -83,9 +84,16 @@
                 const joinDateEl = document.getElementById('user-join-date');
                 const friendStatusContainer = document.getElementById('friend-status-container');
                 const profileContainer = document.querySelector('.profile-container');
+                const profileErrorMessage = document.getElementById('profile-error-message');
+
+                // Clear previous error messages
+                profileErrorMessage.classList.add('hidden');
+                profileErrorMessage.textContent = '';
 
                 if (!username) {
                     displayNameEl.textContent = 'User not specified';
+                    profileErrorMessage.textContent = 'No username provided in the URL. Please ensure you are navigating to a valid profile link.';
+                    profileErrorMessage.classList.remove('hidden');
                     return;
                 }
 
@@ -96,6 +104,8 @@
 
                     if (!snapshot.exists()) {
                         displayNameEl.textContent = 'User not found';
+                        profileErrorMessage.textContent = `Profile for "${username}" not found. It might not exist or there was an issue retrieving it.`;
+                        profileErrorMessage.classList.remove('hidden');
                         return;
                     }
 
@@ -250,6 +260,9 @@
 
                 } catch (error) {
                     console.error("Failed to load user profile:", error);
+                    displayNameEl.textContent = 'Error loading profile';
+                    profileErrorMessage.textContent = `An unexpected error occurred while loading the profile: ${error.message}. Please try again later.`;
+                    profileErrorMessage.classList.remove('hidden');
                 }
             }
 
