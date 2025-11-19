@@ -11,6 +11,7 @@ const urlsToCache = [
   '/gato/index.html',
   '/styles/pages/gato.css',
   '/js/pages/gato.js',
+  '/offline.html',
   // Add other essential assets here
   // e.g., '/account/index.html', '/contact/index.html', etc.
 ];
@@ -51,8 +52,13 @@ self.addEventListener('fetch', (event) => {
               });
 
             return response;
-          }
-        );
+                  }).catch((error) => {
+                    console.error('Fetch failed:', error);
+                    // Return the offline page if a network request fails
+                    return caches.match('/offline.html').then((offlineResponse) => {
+                      return offlineResponse || new Response(null, { status: 503, statusText: 'Service Unavailable' });
+                    });
+                  });
       })
     );
 });
