@@ -36,19 +36,52 @@ document.addEventListener('DOMContentLoaded', () => {
         const joinDateEl = document.getElementById('user-join-date');
         const friendStatusContainer = document.getElementById('friend-status-container');
         const profileContainer = document.querySelector('.profile-container');
+        const profileErrorMessage = document.getElementById('profile-error-message');
+
+        // Clear previous error messages
+        profileErrorMessage.classList.add('hidden');
+        profileErrorMessage.textContent = '';
 
         if (!username) {
             displayNameEl.textContent = 'User not specified';
+            profileErrorMessage.textContent = 'No username provided in the URL. Please ensure you are navigating to a valid profile link.';
+            profileErrorMessage.classList.remove('hidden');
             return;
         }
 
         try {
             const usersRef = ref(db, 'users');
-            const userQuery = query(usersRef, orderByChild('displayName'), equalTo(username));
-            const snapshot = await get(userQuery);
+            const snapshot = await get(usersRef);
 
-            if (!snapshot.exists()) {
+            let userData = null;
+            let userId = null;
+            let data = null;
+
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const user = childSnapshot.val();
+                    if (user.displayName.toLowerCase() === username.toLowerCase()) {
+                        userId = childSnapshot.key;
+                        data = user;
+                        userData = { [userId]: data };
+                    }
+                });
+            }
+
+            if (!data) {
                 displayNameEl.textContent = 'User not found';
+                profileErrorMessage.textContent = `Profile for "${username}" not found. It might not exist or there was an issue retrieving it.`;
+                profileErrorMessage.classList.remove('hidden');
+                return;
+            }
+
+            const userQuery = query(usersRef, orderByChild('displayName'), equalTo(data.displayName));
+            const userSnapshot = await get(userQuery);
+
+            if (!userSnapshot.exists()) {
+                displayNameEl.textContent = 'User not found';
+                profileErrorMessage.textContent = `Profile for "${username}" not found. It might not exist or there was an issue retrieving it.`;
+                profileErrorMessage.classList.remove('hidden');
                 return;
             }
 
@@ -79,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.style.backgroundSize = 'cover';
                 document.body.style.backgroundAttachment = 'fixed';
                 document.body.style.backgroundPosition = 'center';
-                document.body.style.backgroundColor = 'transparent';
+                document.body.style.backgroundColor = 'transparent'; // Ensure color doesn't show through
             } else if (data.profile?.profileBackgroundColor) {
                 document.body.style.backgroundColor = data.profile.profileBackgroundColor;
                 document.body.style.backgroundImage = 'none';
@@ -105,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
             socialsEl.innerHTML = '';
             let hasSocialLinks = false;
 
+            // Display existing social links (Twitter, GitHub, etc.)
             if (data.profile?.socials && Object.keys(data.profile.socials).length > 0) {
                 for (const [platform, handle] of Object.entries(data.profile.socials)) {
                     if (!handle) continue;
@@ -118,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
+            // Display custom social links
             if (data.profile?.customSocials && Object.keys(data.profile.customSocials).length > 0) {
                 Object.values(data.profile.customSocials).forEach(linkData => {
                     if (!linkData.url || !linkData.displayName) return;
@@ -135,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 socialsEl.textContent = 'No social links added yet.';
             }
 
+            // Last.fm Now Playing Logic
             const lastfmNowPlayingSection = document.getElementById('lastfm-now-playing-section');
             const lastfmAlbumArt = document.getElementById('lastfm-album-art');
             const lastfmTrackInfo = document.getElementById('lastfm-track-info');
@@ -144,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const lastfmResponse = await fetch(`/.netlify/functions/lastfm-song?userId=${userId}`);
                 if (lastfmResponse.ok) {
                     const track = await lastfmResponse.json();
+                    // Check if the track is actually playing before displaying the section
                     if (track['@attr'] && track['@attr'].nowplaying === 'true') {
                         lastfmNowPlayingSection.style.display = 'block';
                         lastfmTrackInfo.textContent = `${track.artist['#text']} - ${track.name}`;
@@ -158,12 +195,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             lastfmAlbumArt.style.display = 'none';
                         }
                     } else {
+                        // No song currently playing, keep section hidden
                         lastfmNowPlayingSection.style.display = 'none';
                     }
                 } else if (lastfmResponse.status === 404) {
+                    // No song currently playing or Last.fm not linked, keep section hidden
                     lastfmNowPlayingSection.style.display = 'none';
                 } else {
                     console.error('Error fetching Last.fm song:', await lastfmResponse.text());
+                    // Error, keep section hidden
                     lastfmNowPlayingSection.style.display = 'none';
                 }
             } catch (error) {
@@ -174,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 lastfmTrackLink.style.display = 'none';
             }
 
+            // Friend status logic
             friendStatusContainer.innerHTML = '';
             if (currentUser && currentUser.uid !== userId) {
                 const currentUserRef = ref(db, `users/${currentUser.uid}`);
@@ -195,6 +236,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error("Failed to load user profile:", error);
+            displayNameEl.textContent = 'Error loading profile';
+            profileErrorMessage.textContent = `An unexpected error occurred while loading the profile: ${error.message}. Please try again later.`;
+            profileErrorMessage.classList.remove('hidden');
         }
     }
 
@@ -203,22 +247,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const friendRequestRef = ref(db, `users/${profileUserId}/profile/friendRequests/${currentUser.uid}`);
         await set(friendRequestRef, true);
-        loadUserProfile();
+    loadUserProfile(); // Refresh the profile to show the updated status
     }
 
     async function acceptFriendRequest(profileUserId) {
         if (!currentUser) return alert('You must be logged in to accept friend requests.');
 
+        // Remove friend request from both users
         const currentUserFriendRequestRef = ref(db, `users/${currentUser.uid}/profile/friendRequests/${profileUserId}`);
         const profileUserFriendRequestRef = ref(db, `users/${profileUserId}/profile/friendRequests/${currentUser.uid}`);
         await remove(currentUserFriendRequestRef);
         await remove(profileUserFriendRequestRef);
 
+        // Add to friends list for both users
         const currentUserFriendRef = ref(db, `users/${currentUser.uid}/friends/${profileUserId}`);
         const profileUserFriendRef = ref(db, `users/${profileUserId}/friends/${currentUser.uid}`);
         await set(currentUserFriendRef, true);
         await set(profileUserFriendRef, true);
 
-        loadUserProfile();
+        loadUserProfile(); // Refresh the profile to show the updated status
     }
 });
