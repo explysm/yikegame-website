@@ -26,14 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function loadUserProfile() {
-        const debugEl = document.getElementById('debug-info');
-        debugEl.innerHTML = '--- Debug Info ---<br>';
+
 
         const urlParams = new URLSearchParams(window.location.search);
         const username = urlParams.get('u');
         
-        debugEl.innerHTML += `1. Raw URL query string: ${window.location.search}<br>`;
-        debugEl.innerHTML += `2. Username parsed from URL (?u=): '${username}'<br>`;
+
 
         const displayNameEl = document.getElementById('user-display-name');
         const pfpEl = document.getElementById('pfp-display');
@@ -51,28 +49,28 @@ document.addEventListener('DOMContentLoaded', () => {
             displayNameEl.textContent = 'User not specified';
             profileErrorMessage.textContent = 'No username provided in the URL. Please ensure you are navigating to a valid profile link.';
             profileErrorMessage.classList.remove('hidden');
-            debugEl.innerHTML += '<br><strong>ERROR: No username found in URL.</strong> Script stopped.';
+
             return;
         }
 
         try {
-            debugEl.innerHTML += `3. Preparing to query Firebase for displayName: '${username}'<br>`;
+
             const usersRef = ref(db, 'users');
             const userQuery = query(usersRef, orderByChild('displayName'), equalTo(username));
             
-            debugEl.innerHTML += '4. Executing Firebase query...<br>';
+
             const snapshot = await get(userQuery);
-            debugEl.innerHTML += '5. Firebase query executed.<br>';
+
 
             if (!snapshot.exists()) {
                 displayNameEl.textContent = 'User not found';
                 profileErrorMessage.textContent = `Profile for "${username}" not found. It might not exist or there was an issue retrieving it.`;
                 profileErrorMessage.classList.remove('hidden');
-                debugEl.innerHTML += `<br><strong>ERROR: Firebase query returned no results (snapshot.exists() is false).</strong><br>Checked for displayName = '${username}'. Double-check that this exact user exists in your database.`;
+
                 return;
             }
             
-            debugEl.innerHTML += '6. Success! Snapshot exists. Processing user data...<br>';
+
 
             const userData = snapshot.val();
             const userId = Object.keys(userData)[0];
@@ -222,11 +220,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('add-friend-btn').addEventListener('click', () => addFriend(userId));
                 }
             }
-            debugEl.innerHTML += '7. Profile rendering complete.';
+
 
         } catch (error) {
             console.error("Failed to load user profile:", error);
-            debugEl.innerHTML += `<br><strong>FATAL ERROR in try block:</strong> ${error.message}<br>Stack: ${error.stack}`;
+
             displayNameEl.textContent = 'Error loading profile';
             if (error.message && error.message.toLowerCase().includes("permission denied")) {
                 profileErrorMessage.textContent = "Permission denied. The Firebase security rules for this project do not allow public access to user profiles. Please update your rules to allow reads on the 'users' data.";
