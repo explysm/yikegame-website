@@ -189,6 +189,7 @@
   const generateBtn = document.getElementById('generate-btn');
   const emailInput = document.getElementById('email');
   if (generateBtn && emailInput) {
+    console.log("Generate button script initialized."); // Debug log
     generateBtn.addEventListener('click', () => {
       const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
       let result = '';

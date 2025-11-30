@@ -17,7 +17,31 @@ document.addEventListener('DOMContentLoaded', () => {
         measurementId: "G-FXH0D07D86"
     };
   
+    function generateUniqueId() {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < 5; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+    }
+
     const app = initializeApp(firebaseConfig);
+    const urlParams = new URLSearchParams(window.location.search);
+    let singlePostId = null;
+    // Check if there's a query string and it's not a named parameter
+    if (window.location.search.startsWith('?')) {
+        const potentialId = window.location.search.substring(1); // Remove the '?'
+        // Basic check for a 5-character alphanumeric ID
+        if (potentialId.length === 5 && /^[a-zA-Z0-9]+$/.test(potentialId)) {
+            singlePostId = potentialId;
+        }
+    }
+    // Fallback for named parameter if needed, though user requested direct ID
+    if (!singlePostId) {
+        singlePostId = urlParams.get('postId');
+    }
+
     const db = getDatabase(app);
     const auth = getAuth(app);
   
@@ -34,6 +58,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const postButton = document.getElementById("post-button");
     const tagSearchInput = document.getElementById("tag-search-input");
     const cancelButton = document.getElementById("cancel-btn");
+    const shareLinkModal = document.getElementById("share-link-modal");
+    const postShareLinkInput = document.getElementById("post-share-link-input");
+    const modalCloseButton = shareLinkModal.querySelector(".close-button");
+    const copyModalLinkBtn = document.getElementById("copy-modal-link-btn");
+    const richRefBtn = document.getElementById("rich-ref-btn");
+    const richRefModal = document.getElementById("rich-ref-modal");
+    const richRefModalCloseButton = richRefModal.querySelector(".close-button");
+
+    // Initialize Quill editor
+    const quill = new Quill('#editor', {
+        theme: 'snow',
+        placeholder: 'Write your post content here...',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+                ['blockquote', 'code-block'],
+
+                [{ 'header': 1 }, { 'header': 2 }],               // custom button values
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
+                [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+                [{ 'direction': 'rtl' }],                         // text direction
+
+                [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+
+                [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+                [{ 'font': [] }],
+                [{ 'align': [] }],
+
+                ['link', 'image', 'video'],                         // link and image, video
+
+                ['clean']                                         // remove formatting button
+            ]
+        }
+    });
+
+
   
     const postsPerPage = 5;
     let currentPage = 1;
@@ -69,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
   
-    function fetchPosts(filterTag = null) {
+    function fetchPosts(filterTag = null, singlePostId = null) {
         currentFilterTag = filterTag;
         onValue(postsRef, (snapshot) => {
             const postsData = snapshot.val();
@@ -81,22 +143,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 }));
                 allPostsCache.sort((a, b) => b.timestamp - a.timestamp);
             }
-  
-            let filteredPosts = allPostsCache;
-            if (currentFilterTag) {
-                filteredPosts = allPostsCache.filter(post => post.tags && post.tags.includes(currentFilterTag));
+
+            let postsToRender = [];
+            if (singlePostId) {
+                const post = allPostsCache.find(p => p.id === singlePostId);
+                if (post) {
+                    postsToRender = [post];
+                }
+                // Hide pagination and post button for single post view
+                document.querySelector('.pagination').style.display = 'none';
+                postButton.style.display = 'none';
+                tagSearchInput.style.display = 'none';
+            } else {
+                let filteredPosts = allPostsCache;
+                if (currentFilterTag) {
+                    filteredPosts = allPostsCache.filter(post => post.tags && post.tags.includes(currentFilterTag));
+                }
+
+                const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+
+                prevBtn.disabled = currentPage === 1;
+                nextBtn.disabled = currentPage >= totalPages;
+                pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages || 1}`;
+
+                const startIndex = (currentPage - 1) * postsPerPage;
+                postsToRender = filteredPosts.slice(startIndex, startIndex + postsPerPage);
+
+                // Show pagination and post button for normal view
+                document.querySelector('.pagination').style.display = 'flex';
+                if (currentUserIsDeveloper) {
+                    postButton.style.display = 'block';
+                }
+                tagSearchInput.style.display = 'block';
             }
-  
-            const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  
-            prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = currentPage >= totalPages;
-            pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages || 1}`;
-  
-            const startIndex = (currentPage - 1) * postsPerPage;
-            const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
-  
-            renderPosts(paginatedPosts);
+            renderPosts(postsToRender);
         });
     }
   
@@ -128,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         return `
                             <div class="comment-item" data-comment-id="${comment.id}">
                                 <div class="comment-header">
-                                    <img src="${commentAuthorPfp}" alt="Profile Picture" class="pfp-small">
+                                    <img src="${commentAuthorPfp}" alt="Profile Picture" class="pfp-small" loading="lazy">
                                     <p>${comment.text}</p>
                                 </div>
                                 <small>By ${comment.author} on ${new Date(comment.timestamp).toLocaleString()}</small>
@@ -148,12 +228,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h3>${post.title}</h3>
                         <div class="post-actions">
                             ${currentUserIsDeveloper ? `<button class="delete-post-btn" data-post-id="${post.id}">Delete Post</button>` : ''}
+                            <button class="share-post-btn" data-post-id="${post.id}">Share</button>
                         </div>
-                        <p>${post.content}</p>
-                        ${post.imageUrl ? `<img src="${post.imageUrl}" alt="${post.title}" class="post-image-preview">` : ''}
+                        <div class="post-body-container">
+                            <div class="post-body">${post.content}</div>
+                            <button class="read-more-btn" style="display:none;">Read More</button>
+                        </div>
+                        ${post.imageUrl ? `<img src="${post.imageUrl}" alt="${post.title}" class="post-image-preview" loading="lazy">` : ''}
                         <div class="tags-container">${tagsHtml}</div>
                         <div class="post-meta">
-                            <img src="${postAuthorPfp}" alt="Profile Picture" class="pfp-small">
+                            <img src="${postAuthorPfp}" alt="Profile Picture" class="pfp-small" loading="lazy">
                             <small>By ${post.author} on ${new Date(post.timestamp).toLocaleString()}</small>
                         </div>
                     </div>
@@ -170,6 +254,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="divider"></div>
                 `;
                 postsContainer.appendChild(postElement);
+
+                // Read More functionality
+                const postBodyContainer = postElement.querySelector('.post-body-container');
+                const postBody = postElement.querySelector('.post-body');
+                const readMoreBtn = postElement.querySelector('.read-more-btn');
+                const maxHeight = 200; // Max height before truncating
+
+                if (postBody.scrollHeight > maxHeight) {
+                    postBody.style.maxHeight = `${maxHeight}px`;
+                    postBody.style.overflow = 'hidden';
+                    readMoreBtn.style.display = 'block';
+                    readMoreBtn.textContent = 'Read More';
+
+                    readMoreBtn.addEventListener('click', () => {
+                        if (postBody.style.maxHeight === `${maxHeight}px`) {
+                            postBody.style.maxHeight = 'none';
+                            readMoreBtn.textContent = 'Show Less';
+                        } else {
+                            postBody.style.maxHeight = `${maxHeight}px`;
+                            readMoreBtn.textContent = 'Read More';
+                        }
+                    });
+                }
             });
         } else {
             postsContainer.innerHTML = '<p class="info-message">No posts yet. Be the first to create one!</p>';
@@ -188,11 +295,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const snapshot = await get(userRef);
             if (snapshot.exists() && snapshot.val().isDeveloper === true) {
                 currentUserIsDeveloper = true;
-                postButton.style.display = "block";
+                if (!singlePostId) { // Only show post button if not in single post view
+                    postButton.style.display = "block";
+                }
             }
         }
   
-        fetchPosts();
+        fetchPosts(null, singlePostId);
     }
   
     onAuthStateChanged(auth, async () => {
@@ -201,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
     async function createPost() {
         const title = postTitleInput.value.trim();
-        const content = postContentInput.value.trim();
+        const content = quill.root.innerHTML.trim(); // Get content from Quill editor
         const imageFile = postImageInput.files[0];
         const tags = postTagsInput.value.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag);
         const user = auth.currentUser;
@@ -247,7 +356,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
   
-            const newPostRef = push(ref(db, "posts"));
+            const postId = generateUniqueId();
+            const newPostRef = ref(db, `posts/${postId}`);
             await set(newPostRef, {
                 title,
                 content,
@@ -264,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
             createPostBtn.disabled = false;
             createPostBtn.innerText = "Create Post";
             postTitleInput.value = "";
-            postContentInput.value = "";
+            quill.setContents([]); // Clear Quill editor
             postImageInput.value = "";
             postTagsInput.value = "";
             togglePostForm();
@@ -282,8 +392,55 @@ document.addEventListener('DOMContentLoaded', () => {
     postButton.addEventListener("click", togglePostForm);
     cancelButton.addEventListener("click", hidePostForm);
     createPostBtn.addEventListener("click", createPost);
+
+    // Modal event listeners
+    modalCloseButton.addEventListener("click", () => {
+        shareLinkModal.style.display = "none";
+    });
+
+    window.addEventListener("click", (event) => {
+        if (event.target == shareLinkModal) {
+            shareLinkModal.style.display = "none";
+        }
+    });
+
+    copyModalLinkBtn.addEventListener("click", async () => {
+        const linkToCopy = postShareLinkInput.value;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+                await navigator.clipboard.writeText(linkToCopy);
+                showNotification("Link copied to clipboard!");
+                shareLinkModal.style.display = "none";
+            } catch (err) {
+                console.error('Failed to copy link from modal:', err);
+                showNotification(`Failed to copy link: ${err.message || err}`, false);
+            }
+        } else {
+            // Fallback for environments where clipboard.writeText is still not available even in modal
+            postShareLinkInput.select();
+            document.execCommand("copy");
+            showNotification("Link copied to clipboard (manual fallback)!");
+            shareLinkModal.style.display = "none";
+        }
+    });
+
+    // Rich Ref Modal Event Listeners
+    richRefBtn.addEventListener("click", () => {
+        richRefModal.style.display = "flex";
+    });
+
+    richRefModalCloseButton.addEventListener("click", () => {
+        richRefModal.style.display = "none";
+    });
+
+    window.addEventListener("click", (event) => {
+        if (event.target == richRefModal) {
+            richRefModal.style.display = "none";
+        }
+    });
   
     tagSearchInput.addEventListener('input', (e) => {
+        if (singlePostId) return; // Do nothing if in single post view
         const query = e.target.value.trim().toLowerCase();
         currentPage = 1;
         if (query) {
@@ -297,6 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = auth.currentUser;
   
         if (e.target.classList.contains('tag')) {
+            if (singlePostId) return; // Do nothing if in single post view
             const tag = e.target.dataset.tag;
             tagSearchInput.value = tag;
             currentPage = 1;
@@ -375,6 +533,44 @@ document.addEventListener('DOMContentLoaded', () => {
             showNotification("Post deleted successfully!");
         }
   
+        if (e.target.classList.contains('share-post-btn')) {
+            const postId = e.target.dataset.postId;
+            const postUrl = `${window.location.origin}/post/index.html?${postId}`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Check out this post!',
+                        url: postUrl,
+                    });
+                    showNotification("Post shared successfully!");
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        console.error('Error sharing:', error);
+                        showNotification("Failed to share post.", false);
+                    }
+                }
+            } else {
+                // Fallback for browsers that do not support the Web Share API
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    try {
+                        await navigator.clipboard.writeText(postUrl);
+                        showNotification("Post link copied to clipboard!");
+                    } catch (err) {
+                        console.error('Failed to copy link to clipboard:', err);
+                        showNotification(`Failed to copy link to clipboard: ${err.message || err}`, false);
+                    }
+                } else {
+                    // If Clipboard API is not available at all, show modal
+                    postShareLinkInput.value = postUrl;
+                    shareLinkModal.style.display = "flex"; // Use flex to center
+                    postShareLinkInput.select(); // Select the text for easy copying
+                    postShareLinkInput.setSelectionRange(0, 99999); // For mobile devices
+                }
+            }
+            return;
+        }
+  
         if (e.target.classList.contains('comments-toggle')) {
             const commentsList = e.target.nextElementSibling;
             commentsList.classList.toggle('show');
@@ -392,6 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   
     prevBtn.addEventListener('click', () => {
+        if (singlePostId) return; // Do nothing if in single post view
         if (currentPage > 1) {
             currentPage--;
             fetchPosts(currentFilterTag);
@@ -399,6 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   
     nextBtn.addEventListener('click', () => {
+        if (singlePostId) return; // Do nothing if in single post view
         currentPage++;
         fetchPosts(currentFilterTag);
     });

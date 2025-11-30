@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Post View</title>
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="../styles/pages/gato.css"> <!-- Reusing some styles -->
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="">
+    <meta property="og:title" content="Post Title">
+    <meta property="og:description" content="Post Description">
+    <meta property="og:image" content="">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="">
+    <meta property="twitter:title" content="Post Title">
+    <meta property="twitter:description" content="Post Description">
+    <meta property="twitter:image" content="">
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .post-view-container {
+            background: #0d283c;
+            border: 2px solid #01edf0;
+            box-shadow: 0 0 15px #01edf0;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 800px;
+            width: 100%;
+            margin: 20px auto;
+            color: #fff;
+            text-align: left;
+        }
+        .post-view-container h1 {
+            color: #01edf0;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .post-view-container img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 15px;
+            border: 1px solid #01edf0;
+            box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
+        }
+        .post-meta {
+            font-size: 0.9em;
+            color: rgba(1, 237, 240, 0.7);
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        .pfp-small {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #01edf0;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        .back-to-devlog {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: transparent;
+            border: 2px solid #01edf0;
+            color: #01edf0;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-shadow: 0 0 5px #01edf0;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px rgba(1, 237, 240, 0.5);
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .back-to-devlog:hover {
+            background-color: rgba(1, 237, 240, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="post-view-container">
+        <h1 id="post-title">Loading Post...</h1>
+        <div class="post-meta">
+            <img src="" alt="Profile Picture" class="pfp-small" id="post-author-pfp" loading="lazy">
+            By <span id="post-author"></span> on <span id="post-date"></span>
+        </div>
+        <div id="post-content"></div>
+        <img src="" alt="Post Image" id="post-image" style="display:none;" loading="lazy">
+        <a href="../community/devlog/index.html" class="back-to-devlog">Back to Dev Log</a>
+    </div>
+
+    <script type="module" src="../js/pages/post-view.js"></script>
+</body>
+</html>

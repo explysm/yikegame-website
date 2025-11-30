@@ -19,6 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const auth = getAuth(app);
 
     let currentUser = null;
+    let currentExternalLink = ''; // To store the link to be opened
+
+    // Get modal elements
+    const externalLinkModal = document.getElementById('external-link-modal');
+    const externalLinkUrlDisplay = document.getElementById('external-link-url');
+    const cancelExternalLinkBtn = document.getElementById('cancel-external-link');
+    const proceedExternalLinkBtn = document.getElementById('proceed-external-link');
 
     onAuthStateChanged(auth, (user) => {
         currentUser = user;
@@ -124,6 +131,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             socialsEl.innerHTML = '';
             let hasSocialLinks = false;
+
+            // Event listener for external links
+            socialsEl.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A') {
+                    e.preventDefault(); // Prevent default navigation
+                    currentExternalLink = e.target.href;
+                    externalLinkUrlDisplay.textContent = currentExternalLink;
+                    externalLinkModal.style.display = 'flex';
+                }
+            });
 
             // Display existing social links (Twitter, GitHub, etc.)
             if (data.profile?.socials && Object.keys(data.profile.socials).length > 0) {
@@ -260,4 +277,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         loadUserProfile(); // Refresh the profile to show the updated status
     }
+
+    // Event listeners for the external link warning modal
+    externalLinkModal.querySelector('.close-button').addEventListener('click', () => {
+        externalLinkModal.style.display = 'none';
+    });
+
+    cancelExternalLinkBtn.addEventListener('click', () => {
+        externalLinkModal.style.display = 'none';
+    });
+
+    proceedExternalLinkBtn.addEventListener('click', () => {
+        window.open(currentExternalLink, '_blank'); // Open in new tab
+        externalLinkModal.style.display = 'none';
+    });
+
+    // Close modal if clicked outside
+    window.addEventListener('click', (event) => {
+        if (event.target === externalLinkModal) {
+            externalLinkModal.style.display = 'none';
+        }
+    });
 });

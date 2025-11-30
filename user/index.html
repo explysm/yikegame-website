@@ -6,6 +6,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../styles/style.css">
     <link rel="stylesheet" href="../styles/pages/profile.css">
+    <style>
+        /* General Modal Styles (reused from other pages) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 10001; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #0d283c;
+            border: 2px solid #01edf0;
+            box-shadow: 0 0 15px #01edf0;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            text-align: center;
+            color: #fff;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            color: #01edf0;
+        }
+
+        .modal-content p {
+            color: #fff;
+            margin-bottom: 15px;
+        }
+
+        .modal .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal .close-button:hover,
+        .modal .close-button:focus {
+            color: #01edf0;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .modal-actions .btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-actions .cancel-btn {
+            background-color: transparent;
+            border: 2px solid #ff3333;
+            color: #ff3333;
+            box-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
+        }
+
+        .modal-actions .cancel-btn:hover {
+            background-color: rgba(255, 51, 51, 0.2);
+            box-shadow: 0 0 10px #ff3333;
+        }
+
+        .modal-actions .username-btn { /* Reusing username-btn style for proceed */
+            background-color: transparent;
+            border: 2px solid #01edf0;
+            color: #01edf0;
+            box-shadow: 0 0 5px rgba(1, 237, 240, 0.5);
+        }
+
+        .modal-actions .username-btn:hover {
+            background-color: rgba(1, 237, 240, 0.2);
+            box-shadow: 0 0 10px #01edf0;
+        }
+    </style>
 </head>
 <body>
     <a href="../index.html" class="back-arrow">
@@ -47,5 +143,20 @@
     </main>
 
     <script type="module" src="../js/pages/user-profile.js"></script>
+
+    <!-- External Link Warning Modal -->
+    <div id="external-link-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>External Link Warning</h2>
+            <p>You are about to leave YikeGame and navigate to an external website:</p>
+            <p><strong id="external-link-url"></strong></p>
+            <p>YikeGame is not responsible for the content or privacy practices of external sites.</p>
+            <div class="modal-actions">
+                <button id="cancel-external-link" class="btn cancel-btn">Cancel</button>
+                <button id="proceed-external-link" class="btn username-btn">Proceed</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
