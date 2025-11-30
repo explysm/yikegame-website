@@ -535,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
         if (e.target.classList.contains('share-post-btn')) {
             const postId = e.target.dataset.postId;
-            const postUrl = `${window.location.origin}/post/index.html?${postId}`;
+            const postUrl = `${window.location.origin}/.netlify/functions/post-embed?postId=${postId}`;
 
             if (navigator.share) {
                 try {

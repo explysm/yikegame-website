@@ -66,44 +66,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             updateMetaTags(post, postAuthorPfp);
 
-        } else {
-            document.getElementById('post-title').textContent = "Post Not Found";
-            document.getElementById('post-content').textContent = "The requested post does not exist.";
-            document.getElementById('post-author-pfp').style.display = 'none';
-            document.getElementById('post-author').textContent = '';
-            document.getElementById('post-date').textContent = '';
-        }
-    }
-
-    function updateMetaTags(post, pfpUrl) {
-        const currentUrl = window.location.href;
-        const defaultImage = "https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/yikegames.png"; // Default image for OG if post has none
-
-        // Helper to set meta tags
-        const setMeta = (property, content) => {
-            let element = document.querySelector(`meta[property='${property}']`);
-            if (!element) {
-                element = document.createElement('meta');
-                element.setAttribute('property', property);
-                document.head.appendChild(element);
-            }
-            element.setAttribute('content', content);
-        };
-
-        // Open Graph
-        setMeta('og:url', currentUrl);
-        setMeta('og:title', post.title);
-        setMeta('og:description', post.content.substring(0, 150) + '...'); // Truncate description
-        setMeta('og:image', post.imageUrl || defaultImage);
-        setMeta('og:type', 'article');
-
-        // Twitter Card
-        setMeta('twitter:url', currentUrl);
-        setMeta('twitter:title', post.title);
-        setMeta('twitter:description', post.content.substring(0, 150) + '...');
-        setMeta('twitter:image', post.imageUrl || defaultImage);
-        setMeta('twitter:card', 'summary_large_image');
-    }
-
-    fetchAndRenderPost(postId);
-});
+                    } else {
+                        document.getElementById('post-title').textContent = "Post Not Found";
+                        document.getElementById('post-content').textContent = "The requested post does not exist.";
+                        document.getElementById('post-author-pfp').style.display = 'none';
+                        document.getElementById('post-author').textContent = '';
+                        document.getElementById('post-date').textContent = '';
+                    }
+                }
+            
+                fetchAndRenderPost(postId);
+            });
