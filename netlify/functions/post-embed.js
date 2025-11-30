@@ -2,10 +2,20 @@ const admin = require('firebase-admin');
 
 // Initialize Firebase Admin SDK if not already initialized
 if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.applicationDefault(),
-        databaseURL: process.env.FIREBASE_DATABASE_URL
-    });
+    try {
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            databaseURL: process.env.FIREBASE_DATABASE_URL
+        });
+    } catch (e) {
+        console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY:", e);
+        // Fallback to applicationDefault if parsing fails, though it's unlikely to work without proper setup
+        admin.initializeApp({
+            credential: admin.credential.applicationDefault(),
+            databaseURL: process.env.FIREBASE_DATABASE_URL
+        });
+    }
 }
 
 const db = admin.database();
