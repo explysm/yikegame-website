@@ -5,3 +5,6 @@ netlify/functions/node_modules/
 
 # LocaL VS folder(s)
 .vscode
+
+# node
+node_modules
