@@ -360,10 +360,16 @@ aiDjForm.addEventListener('submit', async function(event) {
         try {
             // Perform a real YouTube search for EACH query the AI suggested
             // We use Promise.all to run them in parallel
-            const searchPromises = queries.map(query => {
+            const searchPromises = queries.map(async query => {
                 const encodedQuery = encodeURIComponent(query);
                 const searchUrl = `${BASE_URL}?part=snippet&q=${encodedQuery}&key=${API_KEY}&type=video&maxResults=1&videoEmbeddable=true`;
-                return fetch(searchUrl).then(res => res.json());
+                try {
+                    const res = await fetch(searchUrl);
+                    const data = await res.json();
+                    return data;
+                } catch (e) {
+                    return { error: { message: "Network/Fetch Error: " + e.message } };
+                }
             });
 
             const searchResults = await Promise.all(searchPromises);
@@ -387,13 +393,24 @@ aiDjForm.addEventListener('submit', async function(event) {
                 }
             });
 
+            if (detailedResults.length === 0) {
+                // If no videos found, check if it was due to an API error
+                const firstError = searchResults.find(r => r.error);
+                if (firstError) {
+                    const msg = firstError.error.message || JSON.stringify(firstError.error);
+                    throw new Error(`YouTube API Error: ${msg}`);
+                } else {
+                    throw new Error("YouTube Search returned 0 results for the AI's suggestions.");
+                }
+            }
+
             // (Optional) If you want full stats (views/likes) for these 5 videos, you could do one more bulk call here:
             // const videoIds = detailedResults.map(v => v.id).join(',');
             // ... fetch(VIDEOS_BASE_URL + ... &id=${videoIds}) ...
 
         } catch (apiError) {
             console.warn("YouTube Search API Failed:", apiError);
-            throw new Error("Could not find videos for the AI suggestions. Check API Quota.");
+            throw apiError; // Re-throw to be caught by the outer catch block which displays the message
         }
 
         renderResults(detailedResults);
