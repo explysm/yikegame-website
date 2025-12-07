@@ -1492,6 +1492,37 @@ footer .footer-link:hover {
     stroke: #01edf0;
 }
 
+.ai-chat-btn {
+    position: fixed;
+    top: 20px;
+    right: 75px; /* Position to the left of the search icon */
+    z-index: 1001;
+    cursor: pointer;
+    background-color: transparent;
+    padding: 10px; /* Reverted padding */
+    border-radius: 50%;
+    border: 2px solid #01edf0;
+    box-shadow: 0 0 15px rgba(1, 237, 240, 0.5);
+    transition: all 0.3s ease;
+    width: 44px; /* Explicitly set width */
+    height: 44px; /* Explicitly set height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ai-chat-btn:hover {
+    background-color: rgba(1, 237, 240, 0.2);
+    transform: scale(1.1);
+}
+
+.ai-chat-btn img {
+    width: 24px; /* Matched search icon SVG size */
+    height: 24px; /* Matched search icon SVG size */
+    border-radius: 50%; /* Make the image rounded */
+    filter: drop-shadow(0 0 5px #01edf0); /* Neon glow for the image */
+}
+
 #search-modal .modal-content {
     max-width: 500px;
 }

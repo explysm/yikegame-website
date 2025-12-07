@@ -188,6 +188,26 @@ body.ai-chat-page {
     line-height: 1.5;
     position: relative;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    word-break: break-word; /* Ensure long words break */
+    overflow-wrap: anywhere; /* Prevent overflow */
+}
+
+/* Home Button in Header */
+.home-btn {
+    text-decoration: none;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    border: 1px solid var(--primary-color);
+    padding: 5px 10px;
+    margin-right: 10px;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.home-btn:hover {
+    background: var(--primary-color);
+    color: #000;
 }
 
 .message.user .message-content {

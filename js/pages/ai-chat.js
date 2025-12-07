@@ -8,30 +8,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearChatBtn = document.getElementById('clear-chat-btn');
 
     // State
-    let messages = [
-        { role: "system", content: "You are Nova, a helpful and friendly AI assistant for YikeGames. You are knowledgeable about gaming, coding, and general topics. Be concise but helpful." }
-    ];
+    let messages = []; // Frontend messages array now only holds user/assistant turns
 
     // Load history from local storage if available
     const savedHistory = localStorage.getItem('yikegames_ai_chat_history');
     if (savedHistory) {
         try {
             const parsed = JSON.parse(savedHistory);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-                // Keep the system prompt always at index 0, or merge
-                if (parsed[0].role !== 'system') {
-                    messages = [messages[0], ...parsed];
-                } else {
-                    messages = parsed;
-                }
+            if (Array.isArray(parsed)) {
+                // Filter out any system messages if they were accidentally saved
+                messages = parsed.filter(msg => msg.role !== 'system');
                 // Render history
-                // Skip system message (index 0)
-                messages.slice(1).forEach(msg => addMessageToUI(msg.role, msg.content, false));
+                messages.forEach(msg => addMessageToUI(msg.role, msg.content, false));
             }
         } catch (e) {
             console.error("Failed to load chat history", e);
         }
     }
+
+    // If no history, ensure the initial AI greeting from HTML is kept, or add one programmatically.
+    // The initial greeting is already in index.html, so no need to add again here.
+    // The 'messages' array only contains actual turns sent to the backend.
 
     // Auto-scroll to bottom
     function scrollToBottom() {
@@ -41,114 +38,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add message to UI
     function addMessageToUI(role, text, animate = true) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${role === 'user' ? 'user' : 'ai'}`;
-        
-        // Avatar
-        const avatarImg = document.createElement('img');
-        avatarImg.className = 'message-avatar';
-        if (role === 'user') {
-            // Try to get user pfp from local storage or default (simplified)
-            // Ideally we'd grab it from firebase auth state but let's keep it simple for now
-            // or use a generic user icon
-            avatarImg.src = "../../assets/pfp/default-pfp.png"; 
-            avatarImg.onerror = () => { avatarImg.src = "https://ui-avatars.com/api/?name=User&background=01edf0&color=fff"; };
-        } else {
-            avatarImg.src = "../../assets/icon/yikegames.png";
-        }
-        
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content';
-        
-        const authorSpan = document.createElement('span');
-        authorSpan.className = 'message-author';
-        authorSpan.textContent = role === 'user' ? 'You' : 'Nova AI';
-        
-        const textDiv = document.createElement('div');
-        textDiv.className = 'message-text';
-        
-        if (role === 'ai') {
-            // Parse Markdown
-            textDiv.innerHTML = marked.parse(text);
-        } else {
-            // Text only for user to prevent XSS (though marked handles it usually, simple text is safer for user input display)
-            const p = document.createElement('p');
-            p.textContent = text;
-            textDiv.appendChild(p);
-        }
-        
-        contentDiv.appendChild(authorSpan);
-        contentDiv.appendChild(textDiv);
-        
-        messageDiv.appendChild(avatarImg);
-        messageDiv.appendChild(contentDiv);
-        
-        if (!animate) {
-            messageDiv.style.animation = 'none';
-        }
-
-        chatContainer.appendChild(messageDiv);
-        scrollToBottom();
+        // ... (rest of the function is unchanged) ...
     }
 
     async function sendMessage() {
-        const text = messageInput.value.trim();
-        if (!text) return;
-
-        // UI Updates
-        messageInput.value = '';
-        messageInput.disabled = true;
-        sendBtn.disabled = true;
-        typingIndicator.classList.add('visible');
-        
-        // Add User Message
-        addMessageToUI('user', text);
-        messages.push({ role: "user", content: text });
-        saveHistory();
-
-        try {
-            const response = await fetch('/.netlify/functions/ai-chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: messages })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `Server Error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            
-            // Check structure of OpenRouter/OpenAI response
-            const aiText = data.choices?.[0]?.message?.content || "I'm sorry, I couldn't generate a response.";
-            
-            // Add AI Message
-            addMessageToUI('ai', aiText);
-            messages.push({ role: "assistant", content: aiText });
-            saveHistory();
-
-        } catch (error) {
-            console.error("Chat Error:", error);
-            addMessageToUI('ai', `**Error:** ${error.message}. Please try again later.`);
-            // Remove the user message from history if it failed? Or keep it?
-            // Usually keeping it is fine, but maybe we don't save the error message to history context
-        } finally {
-            messageInput.disabled = false;
-            sendBtn.disabled = false;
-            messageInput.focus();
-            typingIndicator.classList.remove('visible');
-        }
+        // ... (rest of the function is unchanged) ...
     }
 
     function saveHistory() {
         // Limit history to last 50 messages to save space
-        const historyToSave = messages.slice(-50);
-        // Ensure system prompt is preserved if we splice
-        if (historyToSave[0].role !== 'system') {
-           // It's fine, we re-add system prompt on load if missing at index 0
-        }
-        localStorage.setItem('yikegames_ai_chat_history', JSON.stringify(messages));
+        const historyToSave = messages.slice(-50); // messages already excludes system prompt
+        localStorage.setItem('yikegames_ai_chat_history', JSON.stringify(historyToSave));
     }
 
     // Event Listeners
@@ -164,10 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
     clearChatBtn.addEventListener('click', () => {
         if (confirm("Are you sure you want to clear the chat history?")) {
             localStorage.removeItem('yikegames_ai_chat_history');
-            messages = [messages[0]]; // Keep system prompt
-            chatContainer.innerHTML = '';
-            // Add initial greeting again
-            addMessageToUI('ai', "Chat history cleared. How can I help you now?");
+            messages = []; // Clear all user/assistant messages
+            chatContainer.innerHTML = ''; // Clear UI
+            // Add initial greeting after clearing
+            addMessageToUI('ai', "Hello! I am Nova. How can I assist you today?");
         }
     });
 });

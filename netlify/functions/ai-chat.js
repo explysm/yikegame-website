@@ -8,7 +8,7 @@ exports.handler = async (event, context) => {
 
     try {
         const body = JSON.parse(event.body);
-        const messages = body.messages;
+        let messages = body.messages;
 
         if (!messages || !Array.isArray(messages)) {
             return {
@@ -16,6 +16,23 @@ exports.handler = async (event, context) => {
                 body: JSON.stringify({ error: 'Invalid message format. "messages" array is required.' })
             };
         }
+
+        const systemPrompt = `You are Nova, a helpful and friendly AI assistant for YikeGames. Your primary role is to assist users with inquiries about YikeGames, gaming, coding, and general topics.
+
+Here is important contact and website information:
+- Official Website: \`https://yike.games\`
+- General Inquiries/Support Email: \`hello@yike.games\`
+- Contact Page: \`https://yike.games/contact\`
+- Explysm's Personal Email: \`explysm@yike.games\`
+
+When a user asks for contact information, always prioritize directing them to the official website (\`https://yike.games\`), the general support email (\`hello@yike.games\`), or the contact page (\`https://yike.games/contact\`).
+
+Only provide Explysm's personal email (\`explysm@yike.games\`) if the user specifically requests a direct personal contact for Explysm and the context indicates it is appropriate. Do not offer this email proactively for general support or inquiries.
+
+Maintain a polite, concise, and helpful tone, guiding users to the most relevant resource for their needs.`;
+
+        // Prepend the system prompt to the messages array
+        messages = [{ role: "system", content: systemPrompt }, ...messages];
 
         // Call OpenRouter API
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {

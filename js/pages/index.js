@@ -104,6 +104,16 @@ document.addEventListener('DOMContentLoaded', () => {
     searchIcon.addEventListener('click', () => searchModal.classList.remove('hidden'));
     closeSearchModalBtn.addEventListener('click', () => searchModal.classList.add('hidden'));
 
+    // AI Chat Button
+    const aiChatButton = document.getElementById('ai-chat-button');
+    if (aiChatButton) {
+        aiChatButton.addEventListener('click', () => {
+            document.body.classList.remove('fade-enter-active');
+            document.body.classList.add('fade-exit-active');
+            setTimeout(() => { window.location.href = 'ai/chat/index.html'; }, 500);
+        });
+    }
+
     searchForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
