@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat | YikeGames</title>
+    <link rel="stylesheet" href="../../styles/style.css">
+    <link rel="stylesheet" href="../../styles/pages/ai-chat.css">
+    <link rel="icon" href="../../assets/icon/yikegames.png">
+</head>
+<body class="ai-chat-page">
+
+    <header id="gato-promo-header">
+        <a href="../../gato/index.html">TRY GATO - YOUTUBE PLAYER WITHOUT ADS</a>
+    </header>
+
+    <div class="chat-wrapper">
+        <aside class="ai-sidebar">
+            <img src="../../assets/icon/yikegames.png" alt="AI Avatar" class="ai-avatar">
+            <div class="ai-info">
+                <h2>Nova AI</h2>
+                <p>Powered by Amazon Nova Lite. Ask me anything about gaming, coding, or life!</p>
+            </div>
+            <div class="ai-status">
+                <div class="status-dot"></div>
+                <span>Online</span>
+            </div>
+        </aside>
+
+        <main class="chat-main">
+            <div class="chat-header">
+                <h2>Session History</h2>
+                <button id="clear-chat-btn" class="clear-chat-btn">Clear Chat</button>
+            </div>
+
+            <div id="chat-container">
+                <!-- Messages will appear here -->
+                <div class="message ai">
+                    <img src="../../assets/icon/yikegames.png" alt="AI" class="message-avatar">
+                    <div class="message-content">
+                        <span class="message-author">Nova AI</span>
+                        <div class="message-text">
+                            <p>Hello! I am Nova. How can I assist you today?</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-wrapper">
+                <div id="typing-indicator" class="typing-indicator">Nova AI is thinking...</div>
+                <div class="chat-controls">
+                    <textarea id="message-input" placeholder="Type a message..." maxlength="1000"></textarea>
+                    <button id="send-btn" class="btn">SEND</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div style="text-align: center; margin: 20px;">
+        <a href="../../index.html" class="btn">Back to Home</a>
+    </div>
+
+    <script type="module" src="../../js/pages/ai-chat.js"></script>
+</body>
+</html>
