@@ -190,6 +190,34 @@ body.ai-chat-page {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     word-break: break-word; /* Ensure long words break */
     overflow-wrap: anywhere; /* Prevent overflow */
+    overflow-x: auto; /* Handle wide content like tables */
+    text-align: left; /* Prevent inheriting center alignment */
+}
+
+.message-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.message-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 0.9rem;
+}
+
+.message-content th,
+.message-content td {
+    border: 1px solid var(--primary-color);
+    padding: 8px;
+    text-align: left;
+}
+
+.message-content th {
+    background-color: rgba(1, 237, 240, 0.1);
+    font-weight: bold;
 }
 
 /* Home Button in Header */
