@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getDatabase, ref, get, push, set, remove, onValue, update } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { marked } from "https://cdn.jsdelivr.net/npm/marked@15.0.3/lib/marked.esm.js";
 
 const CLOUDINARY_CLOUD_NAME = "dhptbygpt";
 const CLOUDINARY_UPLOAD_PRESET = "unsigned_upload";
@@ -65,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const richRefBtn = document.getElementById("rich-ref-btn");
     const richRefModal = document.getElementById("rich-ref-modal");
     const richRefModalCloseButton = richRefModal.querySelector(".close-button");
+    const aiPolishBtn = document.getElementById("ai-polish-btn");
 
     // Initialize Quill editor
     const quill = new Quill('#editor', {
@@ -94,6 +96,47 @@ document.addEventListener('DOMContentLoaded', () => {
             ]
         }
     });
+
+    // AI Polish Logic
+    aiPolishBtn.addEventListener('click', async () => {
+        const text = quill.getText().trim();
+        if (!text || text.length < 10) {
+            showNotification("Please write a bit more before polishing!", false);
+            return;
+        }
+
+        aiPolishBtn.disabled = true;
+        aiPolishBtn.textContent = "✨ Polishing...";
+
+        try {
+            const response = await fetch('/.netlify/functions/ai-chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mode: 'devlog',
+                    messages: [{ role: 'user', content: text }]
+                })
+            });
+
+            if (!response.ok) throw new Error("AI request failed");
+
+            const data = await response.json();
+            if (data.choices && data.choices[0].message) {
+                const polishedMarkdown = data.choices[0].message.content;
+                // Convert AI's Markdown to HTML and paste into Quill
+                const html = marked.parse(polishedMarkdown);
+                quill.clipboard.dangerouslyPasteHTML(html);
+                showNotification("✨ Magic polish applied!");
+            }
+        } catch (error) {
+            console.error("AI Polish Error:", error);
+            showNotification("Failed to polish post. Try again.", false);
+        } finally {
+            aiPolishBtn.disabled = false;
+            aiPolishBtn.textContent = "✨ AI Polish";
+        }
+    });
+
 
 
   

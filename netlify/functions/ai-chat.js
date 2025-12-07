@@ -9,6 +9,7 @@ exports.handler = async (event, context) => {
     try {
         const body = JSON.parse(event.body);
         let messages = body.messages;
+        const mode = body.mode || 'chat'; // Default to 'chat'
 
         if (!messages || !Array.isArray(messages)) {
             return {
@@ -17,7 +18,15 @@ exports.handler = async (event, context) => {
             };
         }
 
-        const systemPrompt = `You are Nova, a helpful and friendly AI assistant for YikeGames. Your primary role is to assist users with inquiries about YikeGames, gaming, coding, and general topics.
+        let systemPrompt = "";
+
+        if (mode === 'devlog') {
+            systemPrompt = `You are a professional technical editor. Rewrite the following devlog post to be cleaner, more engaging, and well-formatted in Markdown. Fix typos and grammar. Keep the tone enthusiastic but professional. Return ONLY the rewritten content.`;
+        } else if (mode === 'dj') {
+            systemPrompt = `You are a DJ API. The user will ask for a mood or genre. Return a raw JSON array of 5 YouTube video IDs that match the request. Do not include any text outside the JSON. Example: ["videoId1", "videoId2"]`;
+        } else {
+            // Default 'chat' mode (Nova)
+            systemPrompt = `You are Nova, a helpful and friendly AI assistant for YikeGames. Your primary role is to assist users with inquiries about YikeGames, gaming, coding, and general topics.
 
 Here is important contact and website information:
 - Official Website: \`https://yike.games\`
@@ -30,6 +39,7 @@ When a user asks for contact information, always prioritize directing them to th
 Only provide Explysm's personal email (\`explysm@yike.games\`) if the user specifically requests a direct personal contact for Explysm and the context indicates it is appropriate. Do not offer this email proactively for general support or inquiries.
 
 Maintain a polite, concise, and helpful tone, guiding users to the most relevant resource for their needs.`;
+        }
 
         // Prepend the system prompt to the messages array
         messages = [{ role: "system", content: systemPrompt }, ...messages];

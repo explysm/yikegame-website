@@ -11,6 +11,9 @@ const searchInputHeader = document.getElementById('search-input-header');
 const searchHistoryHeader = document.getElementById('search-history-header');
 const autocompleteSuggestionsHeader = document.getElementById('autocomplete-suggestions-header');
 
+const aiDjForm = document.getElementById('ai-dj-form');
+const aiDjInput = document.getElementById('ai-dj-input');
+
 const mainContent = document.getElementById('main-content');
 const resultsContainer = document.getElementById('results-container');
 const playerContainer = document.getElementById('player-container');
@@ -310,4 +313,76 @@ searchFormHeader.addEventListener('submit', function(event) {
     event.preventDefault();
     const query = searchInputHeader.value.trim();
     handleSearch(query, false);
+});
+
+// --- AI DJ Logic ---
+aiDjForm.addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const prompt = aiDjInput.value.trim();
+    if (!prompt) return;
+
+    // Transition to main content view
+    initialSearchArea.classList.add('hidden');
+    mainHeader.classList.remove('hidden');
+    searchFormHeader.classList.remove('hidden');
+    mainContent.classList.remove('hidden');
+
+    resultsContainer.innerHTML = '<div class="loading-spinner"></div><p class="message" style="color: #ff007f;">AI DJ is curating your playlist...</p>';
+    videoDetailsContainer.classList.add('hidden');
+
+    try {
+        const response = await fetch('/.netlify/functions/ai-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                mode: 'dj',
+                messages: [{ role: 'user', content: prompt }]
+            })
+        });
+
+        if (!response.ok) throw new Error("AI DJ request failed");
+
+        const data = await response.json();
+        const content = data.choices[0].message.content;
+        
+        // Ensure we parse ONLY the JSON array (in case AI adds text despite instructions)
+        const jsonMatch = content.match(/\[.*\]/s);
+        if (!jsonMatch) throw new Error("Invalid response from AI DJ");
+        
+        const videoIds = JSON.parse(jsonMatch[0]);
+
+        if (videoIds.length === 0) {
+            throw new Error("AI found no videos.");
+        }
+
+        // Fetch video details
+        const videoApiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIds.join(',')}&key=${API_KEY}`;
+        const videoResponse = await fetch(videoApiUrl);
+        if (!videoResponse.ok) {
+            throw new Error(`HTTP error fetching video details! Status: ${videoResponse.status}`);
+        }
+        const videoData = await videoResponse.json();
+
+        const detailedResults = videoData.items.map(video => ({
+            id: video.id,
+            title: video.snippet.title,
+            description: video.snippet.description,
+            channelTitle: video.snippet.channelTitle,
+            publishedAt: video.snippet.publishedAt,
+            viewCount: video.statistics?.viewCount || 'N/A',
+            likeCount: video.statistics?.likeCount || 'N/A',
+            duration: video.contentDetails?.duration || 'N/A'
+        }));
+
+        renderResults(detailedResults);
+        
+        // Automatically play the first one
+        if (detailedResults.length > 0) {
+            embedVideo(detailedResults[0]);
+        }
+
+    } catch (error) {
+        console.error("AI DJ Error:", error);
+        resultsContainer.innerHTML = `<p class="message" style="color: #ff007f;">AI DJ Malfunction: ${error.message}</p>`;
+    }
 });

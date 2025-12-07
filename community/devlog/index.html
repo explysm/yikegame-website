@@ -648,7 +648,10 @@
         <input type="text" id="post-title" placeholder="Post Title" class="input-field">
         <div id="editor" style="height: 200px;"></div> <!-- Quill editor div -->
         <input type="text" id="post-tags" placeholder="Tags (e.g., firebase, gamedev)" class="input-field">
-        <button id="rich-ref-btn" class="btn username-btn" style="margin-top: 10px;">Rich Ref</button>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button id="rich-ref-btn" class="btn username-btn">Rich Ref</button>
+            <button id="ai-polish-btn" class="btn username-btn">✨ AI Polish</button>
+        </div>
         <label for="post-image" class="file-label btn">Choose Image</label>
         <input type="file" id="post-image" accept="image/*" class="file-input">
         <div class="post-actions-form-group">
