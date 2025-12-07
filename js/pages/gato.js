@@ -28,7 +28,7 @@ const SEARCH_HISTORY_KEY = 'gatoSearchHistory';
 const MAX_SEARCH_HISTORY = 5; // Limit the number of stored searches
 
 // ⚠️ WARNING: THIS KEY IS PUBLICLY EXPOSED. ONLY USE FOR LOCAL TESTING.
-const API_KEY = "AIzaSyC4F_RXjIYigh5aN-crA5cq75GFweNbjNA";
+const API_KEY = "AIzaSyAdabMBYR4B3pa1k17eD0IEZa2wxD0IBLs";
 const BASE_URL = "https://www.googleapis.com/youtube/v3/search";
 const VIDEOS_BASE_URL = "https://www.googleapis.com/youtube/v3/videos";
 
