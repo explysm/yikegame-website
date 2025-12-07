@@ -349,57 +349,51 @@ aiDjForm.addEventListener('submit', async function(event) {
         const jsonMatch = content.match(/\[.*\]/s);
         if (!jsonMatch) throw new Error("Invalid response from AI DJ");
         
-        const videoIds = JSON.parse(jsonMatch[0]);
+        const queries = JSON.parse(jsonMatch[0]);
 
-        if (videoIds.length === 0) {
-            throw new Error("AI found no videos.");
+        if (queries.length === 0) {
+            throw new Error("AI suggested no queries.");
         }
 
         let detailedResults = [];
 
         try {
-            // Attempt to fetch video details
-            const videoApiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIds.join(',')}&key=${API_KEY}`;
-            const videoResponse = await fetch(videoApiUrl);
-            
-            if (!videoResponse.ok) {
-                throw new Error(`YouTube API Error: ${videoResponse.status}`);
-            }
-            
-            const videoData = await videoResponse.json();
-            detailedResults = videoData.items.map(video => ({
-                id: video.id,
-                title: video.snippet.title,
-                description: video.snippet.description,
-                channelTitle: video.snippet.channelTitle,
-                publishedAt: video.snippet.publishedAt,
-                viewCount: video.statistics?.viewCount || 'N/A',
-                likeCount: video.statistics?.likeCount || 'N/A',
-                duration: video.contentDetails?.duration || 'N/A'
-            }));
+            // Perform a real YouTube search for EACH query the AI suggested
+            // We use Promise.all to run them in parallel
+            const searchPromises = queries.map(query => {
+                const encodedQuery = encodeURIComponent(query);
+                const searchUrl = `${BASE_URL}?part=snippet&q=${encodedQuery}&key=${API_KEY}&type=video&maxResults=1&videoEmbeddable=true`;
+                return fetch(searchUrl).then(res => res.json());
+            });
+
+            const searchResults = await Promise.all(searchPromises);
+
+            // Extract the first video from each search result
+            searchResults.forEach(data => {
+                if (data.items && data.items.length > 0) {
+                    const video = data.items[0];
+                    detailedResults.push({
+                        id: video.id.videoId,
+                        title: video.snippet.title,
+                        description: video.snippet.description,
+                        channelTitle: video.snippet.channelTitle,
+                        publishedAt: video.snippet.publishedAt,
+                        // Search API doesn't return full stats, we'll fetch them if we want, 
+                        // or just leave placeholders to save quota. For a DJ list, placeholders are often fine.
+                        viewCount: 'Wait...', 
+                        likeCount: 'Wait...', 
+                        duration: '...'
+                    });
+                }
+            });
+
+            // (Optional) If you want full stats (views/likes) for these 5 videos, you could do one more bulk call here:
+            // const videoIds = detailedResults.map(v => v.id).join(',');
+            // ... fetch(VIDEOS_BASE_URL + ... &id=${videoIds}) ...
 
         } catch (apiError) {
-            console.warn("YouTube Metadata Fetch Failed (likely quota exceeded), using fallback:", apiError);
-            
-            // Fallback: Create playable objects using just the IDs
-            detailedResults = videoIds.map(id => ({
-                id: id,
-                title: "AI Suggested Track",
-                description: "Video metadata unavailable due to API limits. Click to play.",
-                channelTitle: "AI DJ",
-                publishedAt: new Date().toISOString(),
-                viewCount: '-',
-                likeCount: '-',
-                duration: '-'
-            }));
-
-            // Optional: Notify user visually about the limited mode
-            const warningMsg = document.createElement('div');
-            warningMsg.style.color = '#ffcc00';
-            warningMsg.style.textAlign = 'center';
-            warningMsg.style.marginBottom = '10px';
-            warningMsg.innerHTML = '<small>⚠ metadata limit reached - playing in fallback mode</small>';
-            resultsContainer.appendChild(warningMsg);
+            console.warn("YouTube Search API Failed:", apiError);
+            throw new Error("Could not find videos for the AI suggestions. Check API Quota.");
         }
 
         renderResults(detailedResults);
@@ -407,6 +401,8 @@ aiDjForm.addEventListener('submit', async function(event) {
         // Automatically play the first one
         if (detailedResults.length > 0) {
             embedVideo(detailedResults[0]);
+        } else {
+             throw new Error("No valid videos found from AI suggestions.");
         }
 
     } catch (error) {

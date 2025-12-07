@@ -23,7 +23,7 @@ exports.handler = async (event, context) => {
         if (mode === 'devlog') {
             systemPrompt = `You are a professional technical editor. Rewrite the following devlog post to be cleaner, more engaging, and well-formatted in Markdown. Fix typos and grammar. Keep the tone enthusiastic but professional. Return ONLY the rewritten content.`;
         } else if (mode === 'dj') {
-            systemPrompt = `You are a DJ API. The user will ask for a mood or genre. Return a raw JSON array of 5 YouTube video IDs that match the request. Do not include any text outside the JSON. Example: ["videoId1", "videoId2"]`;
+            systemPrompt = `You are a DJ API. The user will ask for a mood or genre. Return a raw JSON array of 5 distinct YouTube search queries that would find good videos for this request. Do not include video IDs. Example: ["lofi hip hop radio", "chill synthwave mix 2024"]`;
         } else {
             // Default 'chat' mode (Nova)
             systemPrompt = `You are Nova, a helpful and friendly AI assistant for YikeGames. Your primary role is to assist users with inquiries about YikeGames, gaming, coding, and general topics.
