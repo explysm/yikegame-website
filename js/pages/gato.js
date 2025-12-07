@@ -355,24 +355,52 @@ aiDjForm.addEventListener('submit', async function(event) {
             throw new Error("AI found no videos.");
         }
 
-        // Fetch video details
-        const videoApiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIds.join(',')}&key=${API_KEY}`;
-        const videoResponse = await fetch(videoApiUrl);
-        if (!videoResponse.ok) {
-            throw new Error(`HTTP error fetching video details! Status: ${videoResponse.status}`);
-        }
-        const videoData = await videoResponse.json();
+        let detailedResults = [];
 
-        const detailedResults = videoData.items.map(video => ({
-            id: video.id,
-            title: video.snippet.title,
-            description: video.snippet.description,
-            channelTitle: video.snippet.channelTitle,
-            publishedAt: video.snippet.publishedAt,
-            viewCount: video.statistics?.viewCount || 'N/A',
-            likeCount: video.statistics?.likeCount || 'N/A',
-            duration: video.contentDetails?.duration || 'N/A'
-        }));
+        try {
+            // Attempt to fetch video details
+            const videoApiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIds.join(',')}&key=${API_KEY}`;
+            const videoResponse = await fetch(videoApiUrl);
+            
+            if (!videoResponse.ok) {
+                throw new Error(`YouTube API Error: ${videoResponse.status}`);
+            }
+            
+            const videoData = await videoResponse.json();
+            detailedResults = videoData.items.map(video => ({
+                id: video.id,
+                title: video.snippet.title,
+                description: video.snippet.description,
+                channelTitle: video.snippet.channelTitle,
+                publishedAt: video.snippet.publishedAt,
+                viewCount: video.statistics?.viewCount || 'N/A',
+                likeCount: video.statistics?.likeCount || 'N/A',
+                duration: video.contentDetails?.duration || 'N/A'
+            }));
+
+        } catch (apiError) {
+            console.warn("YouTube Metadata Fetch Failed (likely quota exceeded), using fallback:", apiError);
+            
+            // Fallback: Create playable objects using just the IDs
+            detailedResults = videoIds.map(id => ({
+                id: id,
+                title: "AI Suggested Track",
+                description: "Video metadata unavailable due to API limits. Click to play.",
+                channelTitle: "AI DJ",
+                publishedAt: new Date().toISOString(),
+                viewCount: '-',
+                likeCount: '-',
+                duration: '-'
+            }));
+
+            // Optional: Notify user visually about the limited mode
+            const warningMsg = document.createElement('div');
+            warningMsg.style.color = '#ffcc00';
+            warningMsg.style.textAlign = 'center';
+            warningMsg.style.marginBottom = '10px';
+            warningMsg.innerHTML = '<small>⚠ metadata limit reached - playing in fallback mode</small>';
+            resultsContainer.appendChild(warningMsg);
+        }
 
         renderResults(detailedResults);
         
