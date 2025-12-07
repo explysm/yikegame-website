@@ -38,11 +38,99 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add message to UI
     function addMessageToUI(role, text, animate = true) {
-        // ... (rest of the function is unchanged) ...
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', role === 'user' ? 'user' : 'ai');
+
+        const avatarImg = document.createElement('img');
+        avatarImg.classList.add('message-avatar');
+        if (role === 'user') {
+            avatarImg.src = '../../assets/pfp/default-pfp.png';
+            avatarImg.alt = 'User';
+        } else {
+            avatarImg.src = '../../assets/icon/yikegames.png';
+            avatarImg.alt = 'AI';
+        }
+
+        const contentDiv = document.createElement('div');
+        contentDiv.classList.add('message-content');
+
+        const authorSpan = document.createElement('span');
+        authorSpan.classList.add('message-author');
+        authorSpan.textContent = role === 'user' ? 'You' : 'Nova AI';
+
+        const textDiv = document.createElement('div');
+        textDiv.classList.add('message-text');
+
+        if (role === 'ai' || role === 'assistant') {
+            textDiv.innerHTML = marked.parse(text);
+        } else {
+            const p = document.createElement('p');
+            p.textContent = text;
+            textDiv.appendChild(p);
+        }
+
+        contentDiv.appendChild(authorSpan);
+        contentDiv.appendChild(textDiv);
+
+        messageDiv.appendChild(avatarImg);
+        messageDiv.appendChild(contentDiv);
+
+        chatContainer.appendChild(messageDiv);
+        scrollToBottom();
     }
 
     async function sendMessage() {
-        // ... (rest of the function is unchanged) ...
+        const text = messageInput.value.trim();
+        if (!text) return;
+
+        // Clear input
+        messageInput.value = '';
+        messageInput.style.height = 'auto'; // Reset height if it was expanded
+
+        // Add user message to UI and state
+        addMessageToUI('user', text);
+        messages.push({ role: 'user', content: text });
+        saveHistory();
+
+        // Show typing state
+        typingIndicator.classList.add('visible');
+        sendBtn.disabled = true;
+
+        try {
+            const response = await fetch('/.netlify/functions/ai-chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ messages: messages })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server responded with ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            // Expected format from OpenAI/OpenRouter: data.choices[0].message.content
+            if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+                const aiResponse = data.choices[0].message.content;
+                
+                // Add AI message to UI and state
+                addMessageToUI('ai', aiResponse);
+                messages.push({ role: 'assistant', content: aiResponse });
+                saveHistory();
+            } else {
+                throw new Error('Invalid response format from server');
+            }
+
+        } catch (error) {
+            console.error('Error sending message:', error);
+            addMessageToUI('ai', `*Sorry, I encountered an error: ${error.message}*`);
+        } finally {
+            typingIndicator.classList.remove('visible');
+            sendBtn.disabled = false;
+            messageInput.focus();
+        }
     }
 
     function saveHistory() {
