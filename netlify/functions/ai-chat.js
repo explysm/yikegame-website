@@ -44,38 +44,61 @@ Maintain a polite, concise, and helpful tone, guiding users to the most relevant
         // Prepend the system prompt to the messages array
         messages = [{ role: "system", content: systemPrompt }, ...messages];
 
-        // Call OpenRouter API
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
+        const ollamaApiKey = process.env.OLLAMA_API_KEY;
+
+        const headers = {
+            "Content-Type": "application/json",
+        };
+
+        if (ollamaApiKey) {
+            headers["Authorization"] = `Bearer ${ollamaApiKey}`;
+        }
+
+        // Call Ollama API
+        const response = await fetch(`${ollamaBaseUrl}/api/chat`, {
             method: "POST",
-            headers: {
-                "Authorization": `Bearer ${process.env.MAIN_OPENROUTER_KEY}`,
-                "Content-Type": "application/json",
-                "HTTP-Referer": "https://yikegames.netlify.app", // Optional, for OpenRouter rankings
-                "X-Title": "YikeGames AI Chat" // Optional
-            },
+            headers: headers,
             body: JSON.stringify({
-                "model": "amazon/nova-2-lite-v1:free",
+                "model": "gemma3:4b-cloud",
                 "messages": messages
             })
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error("OpenRouter API Error:", errorText);
+            console.error("Ollama API Error:", errorText);
             return {
                 statusCode: response.status,
-                body: JSON.stringify({ error: `OpenRouter API Error: ${response.statusText}`, details: errorText })
+                body: JSON.stringify({ error: `Ollama API Error: ${response.statusText}`, details: errorText })
             };
         }
 
         const data = await response.json();
+
+        // Transform Ollama response to match OpenRouter/OpenAI format for compatibility
+        const transformedData = {
+            id: data.model + "-" + Date.now(), // Generate a unique ID
+            object: "chat.completion",
+            created: Math.floor(Date.now() / 1000),
+            model: data.model,
+            choices: [
+                {
+                    index: 0,
+                    message: data.message,
+                    finish_reason: data.done ? "stop" : null, // Assuming 'done' means 'stop'
+                },
+            ],
+            // Optionally include usage or other fields if available from Ollama
+            // For now, minimal transformation.
+        };
 
         return {
             statusCode: 200,
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(transformedData)
         };
 
     } catch (error) {
