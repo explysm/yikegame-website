@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let relativePath = 'components/footer.html';
         if (path.includes('/account/') || path.includes('/community/') || path.includes('/info/')) {
             relativePath = '../../components/footer.html';
-        } else if (path.includes('/user/') || path.includes('/contact/') || path.includes('/discord/') || path.includes('/67/')) {
+        } else if (path.includes('/user/') || path.includes('/contact/') || path.includes('/67/')) {
             relativePath = '../components/footer.html';
         }
         loadFooter(relativePath);

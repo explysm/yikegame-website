@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let typingTimeout = null;
   let isMessageListenerActive = false; 
 
-  const discordWebhookUrl = "https://discord.com/api/webhooks/1419226962643124336/kOCwAB9OGdalcetSAsG76w-WoaDjLW43y4DmavFgumUn383tY0TwvoEU1Goj4Oz6WeMq";
+
   const defaultPfp = "https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png";
 
   const chatContainer = document.getElementById("chat-container");
@@ -384,30 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  async function sendToDiscord(username, message, avatarUrl) {
-    message = message + " - (***This was sent from the web client.***)"
-    const payload = {
-      username: username,
-      content: message
-    };
-    
-    if (avatarUrl) {
-      payload.avatar_url = avatarUrl;
-    }
 
-    try {
-      const response = await fetch(discordWebhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      if (!response.ok) {
-        console.error("Failed to send to Discord:", response.status);
-      }
-    } catch (error) {
-      console.error("Error sending to Discord:", error);
-    }
-  }
 
   sendBtn.addEventListener("click", () => {
     if (!currentDisplayName) {
@@ -441,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
       timestamp: serverTimestamp()
     });
 
-    sendToDiscord(displayName, text, photoUrl);
+
 
     if (currentUser) {
       update(ref(db, `users/${currentUser.uid}`), { typing: false });
